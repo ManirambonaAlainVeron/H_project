@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if type_msg %}
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if messages %}
+            <div class="alert alert-primary " role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <form action="addcm" method="POST">
+        {% csrf_token %}
+        <label for="select_pro">Province :</label>
+        <select class="form-control chosen" name="select_pro"  id="select_pro">
+            <option value="">Selectionnez la province</option>
+            {% for item in provinces %}
+                <option value="{{item.id_pro}}" class="{{item.nom_pro}}">{{item.nom_pro}}</option>
+            {% endfor %}
+        </select>
+        <label for="nom_com">Commune :</label>
+        <input type="text" name="nom_com" id="nom_com" class="form-control">
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+    </form>
+    <div>
+        <div>
+            <form action="{% url 'chr_cm_url' %}" method="GET" >
+                <input type="text" name="cherch_com" id="cherch_com">
+                <button type="submit" class="btn btn-outline-primary">Chercher</button>
+                <button type="button" class="btn btn-outline-primary">OK</button>
+            </form>
+        </div>
+        <table class="table table-light">
+            <thead>
+                <tr >
+                    <th >Province</th>
+                    <th >Commune</th>
+                    <th colspan="2" ></th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                {% for item in communes %}  
+                    <tr>
+                        <td>{{item.province__nom_pro}}</td>
+                        <td>{{item.nom_com}}</td>
+                        <td>
+                            <form action="edtcm/{{item.id}}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">editer</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="delcm{{item.id}}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr >
+                        <h2><td colspan="4" >Il n'y a pas des communes enregistrées </td></h2>
+                    </tr>
+                {% endfor %}
+            
+            </tbody>
+        </table>
+    </div>   
+{% endblock content %}

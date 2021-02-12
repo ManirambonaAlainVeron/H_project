@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    
+    {% if type_msg %}
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if messages %}
+            <div class="alert alert-primary " role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+    
+    <form action="addpro" method="POST">
+        {% csrf_token %}
+        <div class="row">
+            <label for="nom_p">Province :</label>
+            <input type="Enregister" name="nom_prov" id="nom_p" class="form-control">
+            <button type="submit" class="btn btn-primary"></button>
+        </div>
+    </form>
+    <div>
+        <table class="table table-light">
+            <thead>
+                <tr >
+                    <th >Provinces enregistrés</th>
+                    <th colspan="2" ></th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                {% for item in provinces %}
+                    <tr>
+                        <td>{{item.nom_pro}}</td>
+                        <td>
+                            <form action="edtpro/{{item.id}}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">editer</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="delpro/{{ item.id }}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr >
+                        <h2><td colspan="3" >Il n'y a pas des provinces enregistrés </td></h2>
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div> 
+{% endblock content %}
+
+    

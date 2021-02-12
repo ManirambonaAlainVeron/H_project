@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if type_msg %}
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if messages %}
+            <div class="alert alert-primary " role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+    
+    <form action="{% url 'up_cat_url' categories.id %}">
+        {% csrf_token %}
+        <div>
+            <input type="text" name="nom_cat" id="txt_cat" value="{{categories.nom_cat}}" class="form-control">
+        </div>
+        <div>
+            <button type="submit" class="btn btn-outline-primary">OK</button>
+            <a  class="btn btn-default"  href="{% url 'cat_url' %}">Retourner</a>
+        </div>
+    </form>
+{% endblock content %}

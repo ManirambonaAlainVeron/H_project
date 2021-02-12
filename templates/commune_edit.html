@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if type_msg %}
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if messages %}
+            <div class="alert alert-primary " role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+    
+    <form action="{% url 'up_cm_url' communes.id %}">
+        {% csrf_token %}
+            <label for="select_pro">Province :</label>
+            <select class="form-control chosen" name="select_pro"  id="select_pro">
+                <option value="{{id_province}}">{{nom_province}}</option>
+                {% for item in provinces %}
+                    <option value="{{item.id}}" class="{{item.nom_pro}}">{{item.nom_pro}}</option>
+                {% endfor %}
+            </select>
+            <label for="nom_com">Commune :</label>
+            <input type="text" name="nom_com" id="nom_com" class="form-control" value="{{communes.nom_com}}">
+            <button type="submit" class="btn btn-outline-primary">OK</button>
+            <a  class="btn btn-default"  href="{% url 'com_url' %}">Retourner</a>
+    </form>
+{% endblock content %}

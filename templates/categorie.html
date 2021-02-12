@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if type_msg %}
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if messages %}
+            <div class="alert alert-primary " role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+    
+    <form action="addcat">
+        <label for="nom_cat">Categorie :</label>
+        <input type="text" name="nom_cat" id="nom_cat" class="form-control">
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+    </form>
+    <div>
+        <table class="table table-light">
+            <thead>
+                <tr >
+                    <th >Categories enregistrés</th>
+                    <th colspan="2" ></th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                {% for item in Categories %}
+                    <tr>
+                        <td>{{item.nom_cat}}</td>
+                        <td>
+                            <form action="edtcat/{{item.id}}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">editer</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="delcat/{{ item.id }}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr >
+                        <h2><td colspan="3" >Il n'y a pas des categories enregistrés </td></h2>
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+        </table> 
+    </div>
+{% endblock content %}

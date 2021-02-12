@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if type_msg %}
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if messages %}
+            <div class="alert alert-primary " role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <form action="">
+        <label for="select_p">Province :</label>
+        <select class="form-control chosen" name="select_p"  id="select_p">
+            <option value="">Selectionnez la province</option>
+            {% for item in provinces %}
+                <option value="{{item.id_pro}}" class="{{item.nom_pro}}">{{item.nom_pro}}</option>
+            {% endfor %}
+        </select>
+
+        <label for="select_com">Commune :</label>
+        <select class="form-control chosen" name="select_com"  id="select_com">
+            <option value="">Selectionnez la commune</option>
+            {% for item in communes %}
+                <option value="{{item.id_com}}" class="{{item.nom_com}}">{{item.nom_com}}</option>
+            {% endfor %}
+        </select>
+
+        <label for="nom_col">Colline :</label>
+        <input type="text" name="nom_col" id="nom_col" class="form-control">
+    </form>
+
+    <div>
+        <div>
+            <form action="{% url 'chr_col_url' %}" method="GET" >
+                <input type="text" name="cherch_col" id="cherch_col">
+                <button type="submit" class="btn btn-outline-primary">Chercher</button>
+                <button type="button" class="btn btn-outline-primary">OK</button>
+            </form>
+        </div>
+        <table class="table table-light">
+            <thead>
+                <tr >
+                    <th >Province</th>
+                    <th >Commune</th>
+                    <th >Colline</th>
+                    <th colspan="2" ></th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                {% for item in collines %}  
+                    <tr>
+                        <td>{{item.province__nom_pro}}</td>
+                        <td>{{item.commune__nom_com}}</td>
+                        <td>{{item.nom_col}}</td>
+                        <td>
+                            <form action="edtcol/{{item.id_col}}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">editer</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="delcol{{item.id_col}}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr >
+                        <h2><td colspan="5" >Il n'y a pas des communes enregistrées </td></h2>
+                    </tr>
+                {% endfor %}
+            
+            </tbody>
+        </table>
+    </div>   
+{% endblock content %}

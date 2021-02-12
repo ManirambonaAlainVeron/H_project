@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if type_msg %}
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if messages %}
+            <div class="alert alert-primary " role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+    
+    <form action="">
+        <div class="row">
+            <div>
+                <label for="nom_act">Nom :</label>
+                <input type="text" name="nom_act" id="nom_act" class="form-control">
+                <label for="prenom_act">Prenom :</label>
+                <input type="text" name="prenom_act" id="prenom_act" class="form-control">
+                <label for="num_id">Numero d'identite :</label>
+                <input type="text" name="num_id" id="num_id" class="form-control">
+            </div>
+            <div>
+                <label for="num_tel">Numero téléphone :</label>
+                <input type="text" name="num_tel" id="num_tel">
+                <label for="etat_act">Etat :</label>
+                <select name="etat_act" id="etat_act">
+                    <option value="non bloquer" class="non bloquer">debloquer</option>
+                    <option value="bloquer" class="bloquer">bloquer </option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <button type="submit"></button>
+        </div>
+    </form>
+    <div>
+        <div>
+            <form action="{% url 'chr_cm_url' %}" method="GET" >
+                <label for="cherch_act">Numero téléphone :</label>
+                <input type="text" name="cherch_act" id="cherch_act">
+                <button type="submit" class="btn btn-outline-primary">Chercher</button>
+                <button type="button" class="btn btn-outline-primary">OK</button>
+            </form>
+        </div>
+        <table class="table table-light">
+            <thead>
+                <tr >
+                    <th >Nom</th>
+                    <th >Prenom</th>
+                    <th >Numero d'identité</th>
+                    <th >Numero de téléphone </th>
+                    <th >Etat</th>
+                    <th colspan="2" ></th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                {% for item in acteurs %}  
+                    <tr>
+                        <td>{{item.nom_act}}</td>
+                        <td>{{item.prenom_act}}</td>
+                        <td>{{item.num_ide_act}}</td>
+                        <td>{{item.telephone_act}}</td>
+                        <td>{{item.etat_act}}</td>
+                        <td>
+                            <form action="edtcm/{{item.id}}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">editer</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="delcm{{item.id}}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr >
+                        <h2><td colspan="4" >Il n'y a pas des communes enregistrées </td></h2>
+                    </tr>
+                {% endfor %}
+            
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}
