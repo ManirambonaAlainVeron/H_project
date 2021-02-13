@@ -21,7 +21,8 @@
         {% endif %}
     {% endif %}
     
-    <form action="">
+    <form action="addact">
+        {% csrf_token %}
         <div class="row">
             <div>
                 <label for="nom_act">Nom :</label>
@@ -42,12 +43,12 @@
             </div>
         </div>
         <div>
-            <button type="submit"></button>
+            <button type="submit" class="form-control">Enregistrer</button>
         </div>
     </form>
     <div>
         <div>
-            <form action="{% url 'chr_cm_url' %}" method="GET" >
+            <form action="{% url 'chr_act_url' %}" method="GET" >
                 <label for="cherch_act">Numero téléphone :</label>
                 <input type="text" name="cherch_act" id="cherch_act">
                 <button type="submit" class="btn btn-outline-primary">Chercher</button>
@@ -75,13 +76,13 @@
                         <td>{{item.telephone_act}}</td>
                         <td>{{item.etat_act}}</td>
                         <td>
-                            <form action="edtcm/{{item.id}}">
+                            <form action="edtact/{{item.id}}">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-primary">editer</button>
                             </form>
                         </td>
                         <td>
-                            <form action="delcm{{item.id}}">
+                            <form action="delact{{item.id}}">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-danger">supprimer</button>
                             </form>
@@ -89,7 +90,7 @@
                     </tr>
                 {% empty %}
                     <tr >
-                        <h2><td colspan="4" >Il n'y a pas des communes enregistrées </td></h2>
+                        <h2><td colspan="4" >Il n'y a pas des acteurs enregistrés </td></h2>
                     </tr>
                 {% endfor %}
             

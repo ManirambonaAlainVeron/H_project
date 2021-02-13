@@ -27,7 +27,7 @@
         <select class="form-control chosen" name="select_pro"  id="select_pro">
             <option value="">Selectionnez la province</option>
             {% for item in provinces %}
-                <option value="{{item.id_pro}}" class="{{item.nom_pro}}">{{item.nom_pro}}</option>
+                <option value="{{item.id}}" class="{{item.nom_pro}}">{{item.nom_pro}}</option>
             {% endfor %}
         </select>
         <label for="nom_com">Commune :</label>

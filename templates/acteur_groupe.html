@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if type_msg %}
+    {% if messages %}
+        <div class="alert alert-danger" role="alert">
+            {% for message in messages %}
+                <strong>{{message}}</strong>
+            {% endfor %}
+            </button>
+        </div>
+    {% endif %}
+{% else %}
+    {% if messages %}
+        <div class="alert alert-primary " role="alert">
+            {% for message in messages %}
+                <strong>{{message}}</strong>
+            {% endfor %}
+            </button>
+        </div>
+    {% endif %}
+{% endif %}
+
+<form action="addactgrp">
+    {% csrf_token %}
+    <label for="select_act">Acteur :</label>
+    <select class="form-control chosen" name="select_act"  id="select_act">
+        <option value="">Selectionnez l'acteur</option>
+        {% for item in acteurs %}
+                <option value="{{item.id}}" class="{{item.nom_act}}">{{item.nom_act}} {{item.prenom_act}}-->{{item.telephone_act}}</option>
+        {% endfor %}
+    </select>
+    <label for="select_grp">Groupe :</label>
+    <select class="form-control chosen" name="select_grp"  id="select_grp">
+        <option value="">Selectionnez le groupe</option>
+        {% for item in groupes %}
+            <option value="{{item.id}}" class="{{item.nom_groupe}}">{{item.nom_groupe}}</option>
+        {% endfor %}
+    </select>
+    <label for="etat_actgrp">Etat de l'acteur :</label>
+    <select name="etat_actgrp" id="etat_actgrp">
+        <option value="non bloquer" class="non bloquer">debloquer</option>
+        <option value="bloquer" class="bloquer">bloquer </option>
+    </select>
+    <div>
+        <button type="submit" class="form-control">Integrer l'acteur</button>
+    </div>
+</form>
+<div>
+    <div>
+        <div>
+            <form action="{% url 'chr_act_num_url' %}" method="GET" >
+                <label for="cherch_actgrp">Chercher l'acteur par son numero :</label>
+                <input type="text" name="cherch_actgrp" id="cherch_actgrp">
+                <button type="submit" class="btn btn-outline-primary">Chercher</button>
+                <button type="button" class="btn btn-outline-primary">OK</button>
+            </form>
+        </div>
+        <div>
+            <form action="{% url 'chr_act_grp_url' %}" method="GET" >
+                <label for="cherch_grpact">Chercher par groupe :</label>
+                <input type="text" name="cherch_grpact" id="cherch_grpact">
+                <button type="submit" class="btn btn-outline-primary">Chercher</button>
+                <button type="button" class="btn btn-outline-primary">OK</button>
+            </form>
+        </div>
+    </div>
+    <table class="table table-light">
+        <thead>
+            <tr >
+                <th >Nom</th>
+                <th >Prenom</th>
+                <th >Numero de téléphone </th>
+                <th >Groupe</th>
+                <th >Etat</th>
+                <th colspan="2" ></th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            {% for item in acteur_groupe %}  
+                <tr>
+                    <td>{{item.acteur__nom_act}}</td>
+                    <td>{{item.acteur__prenom_cat}}</td>
+                    <td>{{item.acteur__telephone_act}}</td>
+                    <td>{{item.groupe__nom_groupe}}</td>
+                    <td>{{item.etat_act_group}}</td>
+                    <td>
+                        <form action="edtactgrp/{{item.id}}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">editer</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form action="delactgrp{{item.id}}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">retirer</button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr >
+                    <h2><td colspan="4" >Il n'y a pas des acteurs enregistrés dans les groupes</td></h2>
+                </tr>
+            {% endfor %}
+        
+        </tbody>
+    </table>
+</div>
+{% endblock content %}

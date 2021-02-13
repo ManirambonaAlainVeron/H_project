@@ -106,7 +106,7 @@ def chercher_commune(request):
             messages.info(request, "Saisissez le nom de la commune à chercher svp !")
             return redirect('com_url')
         else:
-            liste = Commune.objects.values('id_com','province__nom_pro','nom_com').filter(nom_com=nom)
+            liste = Commune.objects.values('id','province__nom_pro','nom_com').filter(nom_com=nom)
             nbr = liste.count()
             if nbr == 0:
                 type_msg = "error"
@@ -119,7 +119,7 @@ def chercher_commune(request):
 def afficher_colline(request):
     provinces = Province.objects.all().order_by("nom_pro")
     communes = Commune.objects.all().order_by("id_com")
-    collines = Colline.objects.values('id_col','province__nom_province','commune__nom_com','nom_col').order_by("id_col")
+    collines = Colline.objects.values('id','province__nom_province','commune__nom_com','nom_col').order_by("id")
     return render(request, "colline.html", locals())
 
 def ajouter_colline((request):
@@ -230,7 +230,7 @@ def update_categorie(request, id_cat):
         if len(nom) == 0:
             message.info(request,"Saisissez le nom du categorie svp !")
             type_msg = "error"
-            return render(request,"categorie.html",{'type_msg':type_msg})
+            return render(request,"categorie_edit.html",{'type_msg':type_msg})
         else:
             cat = Categorie.objects.get(pk = id_cat)
             cat.nom_cat = request.POST.get("nom_cat")
@@ -272,7 +272,7 @@ def update_groupe(request, id_g):
         if len(nom) == 0:
             message.info(request,"Saisissez le nom du groupe svp !")
             type_msg = "error"
-            return render(request,"groupe.html",{'type_msg':type_msg})
+            return render(request,"groupe_edit.html",{'type_msg':type_msg})
         else:
             g = Groupe.objects.get(pk = id_g)
             g.nom_groupe = request.POST.get("nom_groupe")
@@ -296,61 +296,69 @@ def ajouter_acteur(request):
         if len(nom) == 0:
             message.info(request,"Saisissez le nom de l'acteur communauteur !")
             type_msg = "error"
-            return render(request,"colline.html",{'type_msg':type_msg})
+            return render(request,"acteur.html",{'type_msg':type_msg})
         elif len(prenom) == 0:
             message.info(request,"Saisissez le prenom de l'acteur communauteur !")
             type_msg = "error"
-            return render(request,"colline.html",{'type_msg':type_msg})
+            return render(request,"acteur.html",{'type_msg':type_msg})
         elif len(tel) == 0:
             message.info(request,"Saisissez le numero de téléphone de l'acteur communauteur !")
             type_msg = "error"
-            return render(request,"colline.html",{'type_msg':type_msg})
+            return render(request,"acteur.html",{'type_msg':type_msg})
         else:
             act = Acteur(nom_act = nom, prenom_act = nom, telephone_act = tel, num_ide_act = identite, etat_act = etat)
             act.save()
             message.info(request, "Enregistrement reussi avec succes !")
             return redirect("act_url")
 
-def supprimer_acteur(request, id_co): 
-    Acteur.objects.get(pk = id_co).delete()
+def supprimer_acteur(request, id_act): 
+    Acteur.objects.get(pk = id_act).delete()
     message.info(request,"La suppresion est reussie avec succes !")
     return redirect("act_url")
 
-def editer_acteur(request, id_co):
-    acteur = Acteur.objects.get(pk = id_co)
-    etat = Acteur.objects.values("etat_act").get(pk=id_co)
+def editer_acteur(request, id_act):
+    acteur = Acteur.objects.get(pk = id_act)
+    etat = Acteur.objects.values("etat_act").get(pk=id_act)
     return render(request,"acteur_edit.html",locals())
 
-"""def update_acteur(request, id_co):
+def update_acteur(request, id_act):
     if request.method == "POST":
-        pro = request.POST.get("select_pro")
-        com = request.POST.get("select_com")
-        col = request.POST.get("nom_col")
-        if len(pro) == 0:
-            message.info(request,"Selectionnez la province svp !")
+        nom = request.POST.get("nom_act")
+        prenom = request.POST.get("prenom_act")
+        identite = request.POST.get("num_id")
+        tel = request.POST.get("num_tel")
+        etat = request.POST.get("etat_act")
+        if len(nom) == 0:
+            message.info(request,"Saisissez le nom de l'acteur communauteur !")
             type_msg = "error"
-            return render(request,"colline_edit.html",{'type_msg':type_msg})
-        elif len(com) == 0:
-            message.info(request,"Selectionnez la commune svp !")
+            return render(request,"acteur_edit.html",{'type_msg':type_msg})
+        elif len(prenom) == 0:
+            message.info(request,"Saisissez le prenom de l'acteur communauteur !")
             type_msg = "error"
-            return render(request,"colline_edit.html",{'type_msg':type_msg})
+            return render(request,"acteur_edit.html",{'type_msg':type_msg})
+        elif len(tel) == 0:
+            message.info(request,"Saisissez le numero de téléphone de l'acteur communauteur !")
+            type_msg = "error"
+            return render(request,"acteur_edit.html",{'type_msg':type_msg})
         else:
-            col = Colline.objects.get(pk = id_co)
-            col.province = request.POST.get("select_pro")
-            col.commune = request.POST.get("select_com")
-            col.nom_col = request.POST.get("nom_col")
-            col.save()
+            act = Acteur.objects.get(pk = id_act)
+            act.nom_act = nom
+            act.prenom_act = prenom
+            act.telephone_act = tel
+            act.num_ide_act = identite
+            act.etat_act = etat
+            act.save()
             message.info(request,"La modification est reussie avec succes !")
-            return redirect("col_url")
-"""
+            return redirect("act_url")
+
 def chercher_acteur(request):
     if request.method == 'GET':
         numero = request.GET.get('cherch_act')
-        if len(nom) == 0:
+        if len(numero) == 0:
             messages.info(request, "Saisissez le numero de l'acteur communauteur à chercher svp !")
             return redirect('act_url')
         else:
-            liste = Acteur.objects.values('id','nom_act','prenom_act','num_ide_act','telephone_act','etat_act').filter(nom_col=nom)
+            liste = Acteur.objects.values('id','nom_act','prenom_act','num_ide_act','telephone_act','etat_act').filter(telephone_act=numero)
             nbr = liste.count()
             if nbr == 0:
                 type_msg = "error"
@@ -358,3 +366,100 @@ def chercher_acteur(request):
                 return redirect('act_url')
             else:
                 return render(request, "acteur.html",{'acteurs':liste})
+
+
+#acteur_groupe
+def afficher_acteur_groupe(request):
+    acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').order_by("nom_act")
+    groupes = Groupe.objects.all().order_by("id_com")
+    acteur_groupe = Acteur_groupe.objects.values('id','acteur__nom_act','acteur__prenom_cat','acteur__telephone_act','groupe__nom_groupe','etat_act_group').order_by("id")
+    return render(request, "acteur_groupe.html", locals())
+
+def retirer_acteur_groupe(request,id_actgrp):
+    act = Acteur_groupe.objects.values('acteur__nom_act','acteur__prenom_act').get(pk = id_actgrp)
+    Acteur_groupe.objects.get(pk = id_actgrp).delete()
+    message.info(request,"L'acteur communauteur"+act.acteur__nom_act+" "+act.acteur__prenom_act+" est retiré dans le groupe !")
+    return redirect("actgrp_url")
+
+def ajouter_acteur_groupe(request):
+        if request.method == "POST":
+            acteur = request.POST.get("nom_act")
+            groupe = request.POST.get("prenom_act")
+            etat = request.POST.get("num_id")
+            if len(acteur) == 0:
+                message.info(request,"Selectionnez l'acteur !")
+                type_msg = "error"
+                return render(request,"colline.html",{'type_msg':type_msg})
+            elif len(groupe) == 0:
+                message.info(request,"Selectionnez le groupe !")
+                type_msg = "error"
+                return render(request,"colline.html",{'type_msg':type_msg})
+            else:
+                act = Acteur(nom_act = nom, prenom_act = nom, telephone_act = tel, num_ide_act = identite, etat_act = etat)
+                act.save()
+                message.info(request, "Enregistrement reussi avec succes !")
+                return redirect("act_url")
+
+def chercher_acteur_groupe_num(request):
+    if request.method == 'GET':
+        num = request.GET.get('cherch_actgrp')
+        if len(numero) == 0:
+            messages.info(request, "Saisissez le numero de l'acteur communauteur à chercher svp !")
+            return redirect('actgrp_url')
+        else:
+            liste = Acteur_groupe.objects.values('id','acteur__nom_act','acteur__prenom_cat','acteur__telephone_act','groupe__nom_groupe','etat_act_group').filter(acteur__telephone_act=numero)
+            nbr = liste.count()
+            if nbr == 0:
+                type_msg = "error"
+                messages.info(request, "L'acteur appartient à aucun groupe !")
+                return redirect('act_actgrp_url')
+            else:
+                return render(request, "acteur_groupe.html",{'acteur_groupe':liste})
+
+
+def chercher_acteur_groupe_grp(request):
+    if request.method == 'GET':
+        grp = request.GET.get('cherch_grpact')
+        if len(grp) == 0:
+            messages.info(request, "Saisissez le nom du groupe à chercher svp !")
+            return redirect('actgrp_url')
+        else:
+            liste = Acteur_groupe.objects.values('id','acteur__nom_act','acteur__prenom_cat','acteur__telephone_act','groupe__nom_groupe','etat_act_group').filter(groupe__nom_groupe=numero)
+            nbr = liste.count()
+            if nbr == 0:
+                type_msg = "error"
+                messages.info(request, "Le groupe a aucun acteur !")
+                return redirect('act_actgrp_url')
+            else:
+                return render(request, "acteur_groupe.html",{'acteur_groupe':liste})
+
+
+def editer_acteur_groupe(request, id_actgrp):
+    acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').order_by("nom_act")
+    acteur_select = Acteur_groupe.objects.values('id','acteur','acteur__nom_act','acteur__prenom_act','acteur__telephone_act').get(pk=id_actgrp)
+    groupes = Groupe.objects.all().order_by("id_com")
+    groupe_select = Acteur_groupe.objects.value('groupe','groupe__nom_groupe').get(pk=id_actgrp)
+    etat = Acteur_groupe.objects.values("etat_act_group").get(pk=id_actgrp)
+    return render(request,"acteur_groupe_edit.html",locals())
+
+def update_acteur_groupe(request, id_actgrp)
+    if request.method == "POST":
+        act = request.POST.get("nom_groupe")
+        grp = request.POST.get("nom_groupe")
+        et = request.POST.get("nom_groupe")
+        if len(act) == 0:
+            message.info(request,"Selectionnez l'acteur svp !")
+            type_msg = "error"
+            return render(request,"acteur_groupe_edit.html",{'type_msg':type_msg})
+        if len(grp) == 0:
+            message.info(request,"Selectionnez le groupe svp !")
+            type_msg = "error"
+            return render(request,"acteur_groupe_edit.html",{'type_msg':type_msg})
+        else:
+            act_grp = Acteur_groupe.objects.get(pk = id_actgrp)
+            act_grp.acteur = request.POST.get("nom_groupe")
+            act_grp.groupe = request.POST.get("nom_groupe")
+            act_grp.etat_act_group = request.POST.get("nom_groupe")
+            act_grp.save()
+            message.info(request,"La modification est reussie avec succes !")
+            return redirect("grp_url")

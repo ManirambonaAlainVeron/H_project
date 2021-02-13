@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if type_msg %}
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if messages %}
+            <div class="alert alert-primary " role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+    
+    <form action="{% url 'up_act_url' acteur.id %}">
+        {% csrf_token %}
+        <div class="row">
+            <div>
+                <label for="nom_act">Nom :</label>
+                <input type="text" name="nom_act" id="nom_act" value="{{acteur.nom_act}}"  class="form-control">
+                <label for="prenom_act">Prenom :</label>
+                <input type="text" name="prenom_act" id="prenom_act" value="{{acteur.prenom_act}}"  class="form-control">
+                <label for="num_id">Numero d'identite :</label>
+                <input type="text" name="num_id" id="num_id" value="{{acteur.num_ide_act}}"  class="form-control">
+            </div>
+            <div>
+                <label for="num_tel">Numero téléphone :</label>
+                <input type="text" name="num_tel" value="{{acteur.telephone_act}}"  id="num_tel" class="form-control">
+                <label for="etat_act">Etat :</label>
+                <select name="etat_act" id="etat_act">
+                    {% ifequal {{acteur.etat_act}} 'non bloque' %} 
+                        <option value="bloquer" class="bloquer">bloquer </option>
+                        <option value="non bloquer" class="non bloquer">debloquer</option>
+                    {% else %}
+                        <option value="non bloquer" class="non bloquer">debloquer</option>
+                        <option value="bloquer" class="bloquer">bloquer </option>
+                    {% endifequal %}   
+                </select>
+            </div>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-outline-primary">OK</button>
+            <a  class="btn btn-default"  href="{% url 'act_url' %}">Retourner</a>
+        </div>
+    </form>
+{% endblock content %}

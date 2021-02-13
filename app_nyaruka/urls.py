@@ -49,4 +49,13 @@ urlpatterns = [
     path('updact/<int:id_act>,', views.update_acteur, name='up_act_url'),
     path('addact', views.ajouter_acteur, name='add_act_url'),
     path('chract', views.chercher_acteur, name='chr_act_url'),
+
+    #acteur_groupe
+    path('actgrp', views.afficher_acteur_groupe, name='actgrp_url'),
+    path('delactgrp/<int:id_actgrp>', views.retirer_acteur_groupe, name='del_actgrp_url'),
+    path('edtactgrp/<int:id_actgrp>', views.editer_acteur_groupe, name='edt_actgrp_url'),
+    path('updactgrp/<int:id_actgrp>,', views.update_acteur_groupe, name='up_actgrp_url'),
+    path('addactgrp', views.ajouter_acteur_groupe, name='add_actgrp_url'),
+    path('chractgrpnum', views.chercher_acteur_groupe_num, name='chr_act_num_url'),
+    path('chractgrpgrp', views.chercher_acteur_groupe_grp, name='chr_act_grp_url'),
 ]

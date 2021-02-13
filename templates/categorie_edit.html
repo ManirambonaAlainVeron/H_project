@@ -21,10 +21,10 @@
         {% endif %}
     {% endif %}
     
-    <form action="{% url 'up_cat_url' categories.id %}">
+    <form action="{% url 'up_cat_url' categorie.id %}">
         {% csrf_token %}
         <div>
-            <input type="text" name="nom_cat" id="txt_cat" value="{{categories.nom_cat}}" class="form-control">
+            <input type="text" name="nom_cat" id="txt_cat" value="{{categorie.nom_cat}}" class="form-control">
         </div>
         <div>
             <button type="submit" class="btn btn-outline-primary">OK</button>
