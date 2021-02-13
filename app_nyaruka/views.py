@@ -1,4 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.http import request
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
+from django.db.utils import IntegrityError
+from .models import Province, Colline, Commune, Acteur, Acteur_groupe, Utilisateur, Groupe, Categorie, Reports, Reponse
 
 # Create your views here.
 def my_index(request):
@@ -463,3 +469,91 @@ def update_acteur_groupe(request, id_actgrp)
             act_grp.save()
             message.info(request,"La modification est reussie avec succes !")
             return redirect("grp_url")
+
+
+#utilisateur
+def afficher_utilisateur(request):
+    utilisateurs = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'num_id_uti','user__username', 'profil', 'user__is_active').order_by("id")
+    return render(request,"utilisateur.html",locals())
+
+def ajouter_utilisateur(request):
+    if request.method == "POST":
+        nom = request.POST.get('txt_nom')
+        prenom = request.POST.get('txt_prenom')
+        identifiant = request.POST.get('txt_num_id')
+        telephone = request.POST.get('txt_tel')
+        password = request.POST.get('txt_pass')
+        etat = request.POST.get('txt_etat')
+        profil = request.POST.get('txt_profil')
+        if len(nom) == 0 or len(prenom) == 0 or len(telephone) == 0 or len(password) == 0 or len(etat) == 0 or len(profil) == 0:
+            messages.info(request, "Completez tous les informations svp !")
+            return redirect("util_url")
+        else:
+            password_confirm = request.POST.get('txt_conf')
+            if password != password_confirm:
+                messages.info(request, "Mot de passe et son confirmation n'est pas identique !")
+                return redirect("util_url")
+            else:
+                try:
+                    user = User.objects.create_user(username=telephone, password=password, is_active=etat)
+                except IntegrityError :
+                    messages.info(request, "Echec!! le numero ou le mot de passe existe déjà !")
+                    return redirect("util_url")
+                utilisateur = Utilisateur(user = user, nom = nom, prenom = prenom, num_id_uti = identifiant ,profil = agent_profil)
+                utilisateur.save()
+                messages.info(request, "La creation d'un utilisateur reussi avec succes !")
+                return redirect('util_url')
+
+def supprimer_utilisateur(request, id_util): 
+        utilisateur = Utilisateur.objects.get(pk=id_util)
+        users = utilisateur.user
+        utilisateur.delete()
+        users.delete()
+        messages.info(request, "La suppression est reussie avec succes !")
+        return redirect("util_url")
+
+def editer_utilisateur(request, id_util):
+    utilisateur = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'user__username','num_id_uti', 'user__is_active', 'profil').get(pk=id_util)
+    return render(request, "utilisateur_edit.html", {'utilisateur':utilisateur})
+
+def update_utilisateur(request, id_util):
+    if request.method == "POST":
+        nom = request.POST.get('txt_nom')
+        prenom = request.POST.get('txt_prenom')
+        identifiant = request.POST.get('txt_num_id')
+        telephone = request.POST.get('txt_tel')
+        etat = request.POST.get('txt_etat')
+        profil = request.POST.get('txt_profil')
+        if len(nom) == 0 or len(prenom) == 0 or len(telephone) == 0 or len(etat) == 0 or len(profil) == 0:
+            messages.info(request, "Completez tous les informations svp !")
+            #return redirect("util_url")
+        else:
+            uti = Utilisateur.objects.get(pk = id_util)
+            uti.nom_util = request.POST.get('txt_nom')
+            uti.prenom_util = request.POST.get('txt_prenom')
+            uti.num_id_uti = request.POST.get('txt_num_id')
+            uti.profil = request.POST.get('profil')
+            u = uti.user
+            u.is_active = request.POST.get('txt_etat')
+            u.username = request.POST.get('txt_tel')
+            uti.save()
+            u.save()
+            messages.info(request, "La modification est reussie avec succes !")
+            return redirect("util_url")
+
+def chercher_utilisateur(request):
+    if request.method == 'GET':
+        numero = request.GET.get('cherch_util')
+        if len(numero) == 0:
+            messages.info(request, "Saisissez le numero de l'utilisateur à chercher svp !")
+            return redirect('util_url')
+        else:
+            liste = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'num_id_uti','user__username', 'profil', 'user__is_active').filter(telephone_act=numero)
+            nbr = liste.count()
+            if nbr == 0:
+                type_msg = "error"
+                messages.info(request, "L'utilisateur n'existe pas dans le system ou bien verifier le numero !")
+                return redirect('util_url')
+            else:
+                return render(request, "acteur.html",{'acteurs':liste})
+

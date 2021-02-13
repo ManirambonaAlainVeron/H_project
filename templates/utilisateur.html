@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if type_msg %}
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if messages %}
+            <div class="alert alert-primary " role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+    
+    <form action="addutil">
+        {% csrf_token %}
+        <div class="row">
+            <div>
+                <label for="txt_nom">Nom :</label>
+                <input type="text" name="txt_nom" id="txt_nom" class="form-control">
+                <label for="txt_prenom">Prenom :</label>
+                <input type="text" name="txt_prenom" id="txt_prenom" class="form-control">
+                <label for="txt_num_id">Numero d'identite :</label>
+                <input type="text" name="txt_num_id" id="txt_num_id" class="form-control">
+                <label for="txt_tel">Numero téléphone :</label>
+                <input type="text" name="txt_tel" id="txt_tel" class="form-control">
+            </div>
+            <div>
+                <label for="txt_pass">Mot de passe :</label>
+                <input type="password" name="txt_pass" id="txt_pass" class="form-control">
+                <label for="txt_conf">Confirmation :</label>
+                <input type="password" name="txt_conf" id="txt_conf" placeholder="tapez encore le mot de passe" class="form-control">
+                <label for="txt_profil">Profil :</label>
+                <select name="txt_profil" id="txt_profil" class="form-control">
+                    <option value="non bloquer" class="non bloquer">Selectionnez son profil</option>
+                    <option value="admin" class="admin">Administrateur</option>
+                    <option value="simple" class="simple">Simple</option>
+                </select>
+                <label for="txt_etat"></label>
+                <select name="txt_etat" id="txt_etat" class="form-control">
+                    <option value="True" class="True">debloquer</option>
+                    <option value="False" class="False">bloquer </option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Ajouter</button>
+        </div>
+        <div>
+            <div>
+                <form action="{% url 'chr_util_url' %}" method="GET" >
+                    <label for="cherch_util">Numero téléphone :</label>
+                    <input type="text" name="cherch_util" id="cherch_util">
+                    <button type="submit" class="btn btn-outline-primary">Chercher</button>
+                    <button type="button" class="btn btn-outline-primary">OK</button>
+                </form>
+            </div>
+            <div>
+                <table class="table table-light">
+                    <thead>
+                        <tr >
+                            <th >Nom</th>
+                            <th >Prenom</th>
+                            <th >Numero d'identité</th>
+                            <th >Numero de téléphone </th>
+                            <th >Profil</th>
+                            <th >Etat</th>
+                            <th colspan="2" ></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        {% for item in utilisateurs %}  
+                            <tr>
+                                <td>{{item.nom_uti}}</td>
+                                <td>{{item.prenom_uti}}</td>
+                                <td>{{item.num_id_uti}}</td>
+                                <td>{{item.user__username}}</td>
+                                <td>{{item.profil}}</td>
+                                <td>{{item.user__is_active}}</td>
+                                <td>
+                                    <form action="edtutil/{{item.id}}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-primary">editer</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form action="delutil{{item.id}}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr >
+                                <h2><td colspan="4" >Il n'y a pas des utilisateurs enregistrés </td></h2>
+                            </tr>
+                        {% endfor %}
+                    
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+{% endblock content %}

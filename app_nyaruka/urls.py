@@ -58,4 +58,12 @@ urlpatterns = [
     path('addactgrp', views.ajouter_acteur_groupe, name='add_actgrp_url'),
     path('chractgrpnum', views.chercher_acteur_groupe_num, name='chr_act_num_url'),
     path('chractgrpgrp', views.chercher_acteur_groupe_grp, name='chr_act_grp_url'),
+
+    #utilisateur
+    path('util', views.afficher_utilisateur, name='util_url'),
+    path('delutil/<int:id_util>', views.supprimer_utilisateur, name='del_util_url'),
+    path('edtutil/<int:id_util>', views.editer_utilisateur, name='edt_util_url'),
+    path('updutil/<int:id_util>,', views.update_utilisateur, name='up_util_url'),
+    path('addutil', views.ajouter_utilisateur, name='add_util_url'),
+    path('chrutil', views.chercher_utilisateur, name='chr_util_url'),
 ]
