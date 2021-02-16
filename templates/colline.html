@@ -21,41 +21,42 @@
         {% endif %}
     {% endif %}
 
-    <form action="">
-        <label for="select_p">Province :</label>
-        <select class="form-control chosen" name="select_p"  id="select_p">
-            <option value="">Selectionnez la province</option>
-            {% for item in provinces %}
-                <option value="{{item.id_pro}}" class="{{item.nom_pro}}">{{item.nom_pro}}</option>
-            {% endfor %}
-        </select>
-
+    <form action="addcol" method="POST">
+        {% csrf_token %}
         <label for="select_com">Commune :</label>
         <select class="form-control chosen" name="select_com"  id="select_com">
             <option value="">Selectionnez la commune</option>
             {% for item in communes %}
-                <option value="{{item.id_com}}" class="{{item.nom_com}}">{{item.nom_com}}</option>
+                <option value="{{item.id}}" class="{{item.nom_com}}">{{item.nom_com}}</option>
             {% endfor %}
         </select>
 
         <label for="nom_col">Colline :</label>
         <input type="text" name="nom_col" id="nom_col" class="form-control">
-    </form>
 
+        <label for="select_act">Acteur communauteur :</label>
+        <select class="form-control chosen" name="select_act"  id="select_act">
+            <option value="">Selectionnez l'acteur</option>
+            {% for item in acteurs %}
+                    <option value="{{item.id}}" class="{{item.nom_act}}">{{item.nom_act}} {{item.prenom_act}}  {{item.telephone_act}}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary">Attribuer</button>
+    </form>
     <div>
         <div>
             <form action="{% url 'chr_col_url' %}" method="GET" >
-                <input type="text" name="cherch_col" id="cherch_col">
+                <input type="text" name="cherch_col" id="cherch_col" placeholder="Colline à chercher">
                 <button type="submit" class="btn btn-outline-primary">Chercher</button>
-                <button type="button" class="btn btn-outline-primary">OK</button>
+                <button type="button" class="btn btn-outline-primary"><a href="{% url 'col_url'%}">OK</a></button>
             </form>
         </div>
         <table class="table table-light">
             <thead>
                 <tr >
-                    <th >Province</th>
                     <th >Commune</th>
                     <th >Colline</th>
+                    <th >Acteur communauteur</th>
                     <th colspan="2" ></th>
                 </tr>
             </thead>
@@ -63,17 +64,17 @@
                 
                 {% for item in collines %}  
                     <tr>
-                        <td>{{item.province__nom_pro}}</td>
                         <td>{{item.commune__nom_com}}</td>
                         <td>{{item.nom_col}}</td>
+                        <td>{{item.acteur__nom_act}} {{item.acteur__prenom_act}} {{item.acteur__telephone_act}}</td>
                         <td>
-                            <form action="edtcol/{{item.id_col}}">
+                            <form action="edtcol/{{item.id}}" method="POST">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-primary">editer</button>
                             </form>
                         </td>
                         <td>
-                            <form action="delcol{{item.id_col}}">
+                            <form action="delcol/{{item.id}}" method="POST">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-danger">supprimer</button>
                             </form>

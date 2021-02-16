@@ -21,13 +21,13 @@
     {% endif %}
 {% endif %}
 
-<form action="addactgrp">
+<form action="addactgrp" method="POST">
     {% csrf_token %}
-    <label for="select_act">Acteur :</label>
+    <label for="select_act">Acteur communauteur :</label>
     <select class="form-control chosen" name="select_act"  id="select_act">
         <option value="">Selectionnez l'acteur</option>
         {% for item in acteurs %}
-                <option value="{{item.id}}" class="{{item.nom_act}}">{{item.nom_act}} {{item.prenom_act}}-->{{item.telephone_act}}</option>
+                <option value="{{item.id}}" class="{{item.nom_act}}">{{item.nom_act}} {{item.prenom_act}}  {{item.telephone_act}}</option>
         {% endfor %}
     </select>
     <label for="select_grp">Groupe :</label>
@@ -43,7 +43,7 @@
         <option value="bloquer" class="bloquer">bloquer </option>
     </select>
     <div>
-        <button type="submit" class="form-control">Integrer l'acteur</button>
+        <button type="submit" class="btn btn-primary">Integrer l'acteur</button>
     </div>
 </form>
 <div>
@@ -53,7 +53,7 @@
                 <label for="cherch_actgrp">Chercher l'acteur par son numero :</label>
                 <input type="text" name="cherch_actgrp" id="cherch_actgrp">
                 <button type="submit" class="btn btn-outline-primary">Chercher</button>
-                <button type="button" class="btn btn-outline-primary">OK</button>
+                <button type="button" class="btn btn-outline-primary"><a href="{% url 'actgrp_url'%}">OK</a></button>
             </form>
         </div>
         <div>
@@ -61,7 +61,7 @@
                 <label for="cherch_grpact">Chercher par groupe :</label>
                 <input type="text" name="cherch_grpact" id="cherch_grpact">
                 <button type="submit" class="btn btn-outline-primary">Chercher</button>
-                <button type="button" class="btn btn-outline-primary">OK</button>
+                <button type="button" class="btn btn-outline-primary"><a href="{% url 'actgrp_url'%}">OK</a></button>
             </form>
         </div>
     </div>
@@ -81,18 +81,19 @@
             {% for item in acteur_groupe %}  
                 <tr>
                     <td>{{item.acteur__nom_act}}</td>
-                    <td>{{item.acteur__prenom_cat}}</td>
+                    <td>{{item.acteur__prenom_act}}</td>
                     <td>{{item.acteur__telephone_act}}</td>
                     <td>{{item.groupe__nom_groupe}}</td>
-                    <td>{{item.etat_act_group}}</td>
+                    <td>{{item.etat_act_group}}   
+                    </td>
                     <td>
-                        <form action="edtactgrp/{{item.id}}">
+                        <form action="edtactgrp/{{item.id}}" method="POST">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-primary">editer</button>
                         </form>
                     </td>
                     <td>
-                        <form action="delactgrp{{item.id}}">
+                        <form action="delactgrp/{{item.id}}" method="POST">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger">retirer</button>
                         </form>

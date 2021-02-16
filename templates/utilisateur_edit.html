@@ -21,48 +21,41 @@
         {% endif %}
     {% endif %}
 
-    <form action="{% url 'up_util_url' utilisateur.id %}">
+    <form action="{% url 'up_util_url' utilisateurs.id %}" method="POST">
+        {% csrf_token %}
         <div class="row">
             <div>
                 <label for="txt_nom">Nom :</label>
-                <input type="text" name="txt_nom" id="txt_nom" value="{{utilisateur.nom_uti}}"  class="form-control">
+                <input type="text" name="txt_nom" id="txt_nom" value="{{utilisateurs.nom_uti}}"  class="form-control">
                 <label for="txt_prenom">Prenom :</label>
-                <input type="text" name="txt_prenom" id="txt_prenom" value="{{utilisateur.prenom_uti}}"  class="form-control">
+                <input type="text" name="txt_prenom" id="txt_prenom" value="{{utilisateurs.prenom_uti}}"  class="form-control">
                 <label for="txt_num_id">Numero d'identite :</label>
-                <input type="text" name="txt_num_id" id="txt_num_id" value="{{utilisateur.num_id_uti}}"  class="form-control">
+                <input type="text" name="txt_num_id" id="txt_num_id" value="{{utilisateurs.num_id_uti}}"  class="form-control">
               
             </div>
             <div>
                 <label for="txt_tel">Numero téléphone :</label>
-                <input type="text" name="txt_tel" id="txt_tel" value="{{utilisateur.user__username}}"  class="form-control">
+                <input type="text" name="txt_tel" id="txt_tel" value="{{utilisateurs.user__username}}"  class="form-control">
                 <label for="txt_profil">Profil :</label>
                 <select name="txt_profil" id="txt_profil" class="form-control">
-                    <option value="non bloquer" class="non bloquer">Selectionnez son profil</option>
-                    <option value="admin" class="admin">Administrateur</option>
-                    <option value="simple" class="simple">Simple</option>
-                    {% ifequal {{utilisateur.profil}} 'admin' %} 
-                        <option value="admin" class="admin">Administrateur</option>
-                        <option value="simple" class="simple">Simple</option>
-                    {% else %}
                         <option value="simple" >Simple</option>
                         <option value="admin" class="admin">Administrateur</option>
-                    {% endifequal %}
                 </select>
-                <label for="txt_etat"></label>
+                <label for="txt_etat">Etat :</label>
                 <select name="txt_etat" id="txt_etat" class="form-control">
-                    {% ifequal {{utilisateur.user__is_active}} 'False' %} 
-                        <option value="False" >bloquer </option>
-                        <option value="True" >debloquer</option>
-                    {% else %}
+                    {% if utilisateurs.user__is_active == True %}
                         <option value="True" >debloquer</option>
                         <option value="False">bloquer </option>
-                    {% endifequal %}
+                    {% else %}
+                        <option value="False" >bloquer </option>
+                        <option value="True" >debloquer</option>
+                    {% endif %}
                 </select>
             </div>
         </div>
         <div>
             <button type="submit" class="btn btn-outline-primary">OK</button>
-            <a  class="btn btn-default"  href="{% url 'util_url' %}">Retourner</a>>
+            <a  class="btn btn-default"  href="{% url 'util_url' %}"><< Retourner</a>
         </div>
     </form>       
 {% endblock content %}

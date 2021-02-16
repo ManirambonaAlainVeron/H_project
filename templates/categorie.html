@@ -21,7 +21,8 @@
         {% endif %}
     {% endif %}
     
-    <form action="addcat">
+    <form action="addcat" method="POST">
+        {% csrf_token %}
         <label for="nom_cat">Categorie :</label>
         <input type="text" name="nom_cat" id="nom_cat" class="form-control">
         <button type="submit" class="btn btn-primary">Enregistrer</button>
@@ -36,7 +37,7 @@
             </thead>
             <tbody>
                 
-                {% for item in Categories %}
+                {% for item in categories %}
                     <tr>
                         <td>{{item.nom_cat}}</td>
                         <td>

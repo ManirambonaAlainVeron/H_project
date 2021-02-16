@@ -67,9 +67,8 @@ class Utilisateur(models.Model):
     nom_uti = models.CharField(max_length=50)
     prenom_uti = models.CharField(max_length=50)
     num_id_uti = models.CharField(max_length=50)
-    telephone_uti = models.CharField(max_length=50)
-    profil_act = models.CharField(max_length=50)
-    etat_act = models.CharField(max_length=50)
+    profil = models.CharField(max_length=50)
+    etat = models.CharField(max_length=50)
 
     class Meta:
         db_table = 'Utilisateur'

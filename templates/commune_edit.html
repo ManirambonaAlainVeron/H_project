@@ -21,7 +21,7 @@
         {% endif %}
     {% endif %}
     
-    <form action="{% url 'up_cm_url' communes.id %}">
+    <form action="{% url 'up_cm_url' communes.id %}" method="POST">
         {% csrf_token %}
             <label for="select_pro">Province :</label>
             <select class="form-control chosen" name="select_pro"  id="select_pro">
@@ -31,8 +31,8 @@
                 {% endfor %}
             </select>
             <label for="nom_com">Commune :</label>
-            <input type="text" name="nom_com" id="nom_com" class="form-control" value="{{communes.nom_com}}">
+            <input type="text" name="nom_com" id="nom_com" class="form-control" value="{{communes.nom_com}}" autocomplete="off">
             <button type="submit" class="btn btn-outline-primary">OK</button>
-            <a  class="btn btn-default"  href="{% url 'com_url' %}">Retourner</a>
+            <a  class="btn btn-default"  href="{% url 'cm_url' %}"><< Retourner</a>
     </form>
 {% endblock content %}

@@ -31,15 +31,15 @@
             {% endfor %}
         </select>
         <label for="nom_com">Commune :</label>
-        <input type="text" name="nom_com" id="nom_com" class="form-control">
+        <input type="text" name="nom_com" id="nom_com" class="form-control" autocomplete="off">
         <button type="submit" class="btn btn-primary">Enregistrer</button>
     </form>
     <div>
         <div>
             <form action="{% url 'chr_cm_url' %}" method="GET" >
-                <input type="text" name="cherch_com" id="cherch_com">
+                <input type="text" name="cherch_com" id="cherch_com" autocomplete="off" placeholder="Checher par nom commune">
                 <button type="submit" class="btn btn-outline-primary">Chercher</button>
-                <button type="button" class="btn btn-outline-primary">OK</button>
+                <button type="button" class="btn btn-outline-primary"><a href="{% url 'cm_url'%}">OK</a></button>
             </form>
         </div>
         <table class="table table-light">
@@ -57,13 +57,13 @@
                         <td>{{item.province__nom_pro}}</td>
                         <td>{{item.nom_com}}</td>
                         <td>
-                            <form action="edtcm/{{item.id}}">
+                            <form action="edtcm/{{item.id}}" method="POST">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-primary">editer</button>
                             </form>
                         </td>
                         <td>
-                            <form action="delcm{{item.id}}">
+                            <form action="delcm/{{item.id}}" method="POST">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-danger">supprimer</button>
                             </form>

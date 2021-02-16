@@ -15,8 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
-
+from app_nyaruka import views
 urlpatterns = [
+    path('',views.my_auth,name="auth_url" ),
     path('admin/', admin.site.urls),
     path('nyaruka/', include('app_nyaruka.urls')),
 ]

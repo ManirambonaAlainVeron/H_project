@@ -20,14 +20,14 @@
             </div>
         {% endif %}
     {% endif %}
-    <form action="{% url 'up_pro_url' provinces.id %}">
+    <form action="{% url 'up_grp_url' groupes.id %}" method="POST">
         {% csrf_token %}
         <div>
-            <input type="text" name="nom_prov" id="txt_prov" value="{{provinces.nom_pro}}" class="form-control">
+            <input type="text" name="nom_grp" id="nom_grp" value="{{groupes.nom_groupe}}" class="form-control">
         </div>
         <div>
             <button type="submit" class="btn btn-outline-primary">OK</button>
-            <a  class="btn btn-default"  href="{% url 'pro_url' %}">Retourner</a>
+            <a  class="btn btn-default"  href="{% url 'grp_url' %}"><< Retourner</a>
         </div>
     </form>        
 {% endblock content %}

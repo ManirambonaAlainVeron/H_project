@@ -21,14 +21,14 @@
         {% endif %}
     {% endif %}
     
-    <form action="{% url 'up_cat_url' categorie.id %}">
+    <form action="{% url 'up_cat_url' categories.id %}" method="POST">
         {% csrf_token %}
         <div>
-            <input type="text" name="nom_cat" id="txt_cat" value="{{categorie.nom_cat}}" class="form-control">
+            <input type="text" name="nom_cat" id="txt_cat" value="{{categories.nom_cat}}" class="form-control" autocomplete="off">
         </div>
         <div>
             <button type="submit" class="btn btn-outline-primary">OK</button>
-            <a  class="btn btn-default"  href="{% url 'cat_url' %}">Retourner</a>
+            <a  class="btn btn-default"  href="{% url 'cat_url' %}"><< Retourner</a>
         </div>
     </form>
 {% endblock content %}

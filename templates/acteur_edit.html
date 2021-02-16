@@ -21,7 +21,7 @@
         {% endif %}
     {% endif %}
     
-    <form action="{% url 'up_act_url' acteur.id %}">
+    <form action="{% url 'up_act_url' acteur.id %}" method="POST">
         {% csrf_token %}
         <div class="row">
             <div>
@@ -37,19 +37,19 @@
                 <input type="text" name="num_tel" value="{{acteur.telephone_act}}"  id="num_tel" class="form-control">
                 <label for="etat_act">Etat :</label>
                 <select name="etat_act" id="etat_act">
-                    {% ifequal {{acteur.etat_act}} 'bloque' %} 
-                        <option value="bloquer" class="bloquer">bloquer </option>
-                        <option value="non bloquer" class="non bloquer">debloquer</option>
+                    {% if acteur.etat_act == 'non bloquer' %}
+                        <option value="non bloquer" >debloquer</option>
+                        <option value="bloquer">bloquer </option>
                     {% else %}
-                        <option value="non bloquer" class="non bloquer">debloquer</option>
-                        <option value="bloquer" class="bloquer">bloquer </option>
-                    {% endifequal %}   
+                        <option value="bloquer" >bloquer </option>
+                        <option value="non bloquer" >debloquer</option>
+                    {% endif %}
                 </select>
             </div>
         </div>
         <div>
             <button type="submit" class="btn btn-outline-primary">OK</button>
-            <a  class="btn btn-default"  href="{% url 'act_url' %}">Retourner</a>
+            <a  class="btn btn-default"  href="{% url 'act_url' %}"><< Retourner</a>
         </div>
     </form>
 {% endblock content %}

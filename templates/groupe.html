@@ -22,7 +22,8 @@
         {% endif %}
     {% endif %}
     
-    <form action="addgrp">
+    <form action="addgrp" method="POST">
+        {% csrf_token %}
         <label for="nom_cat">Nom du groupe :</label>
         <input type="text" name="nom_grp" id="nom_grp" class="form-control">
         <button type="submit" class="btn btn-primary">Enregistrer</button>
@@ -37,17 +38,17 @@
             </thead>
             <tbody>
                 
-                {% for item in Categories %}
+                {% for item in groupes %}
                     <tr>
-                        <td>{{item.nom_cat}}</td>
+                        <td>{{item.nom_groupe}}</td>
                         <td>
-                            <form action="edtcat/{{item.id}}" method="POST">
+                            <form action="edtgrp/{{item.id}}" method="POST">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-primary">editer</button>
                             </form>
                         </td>
                         <td>
-                            <form action="delcat/{{ item.id }}" method="POST">
+                            <form action="delgrp/{{ item.id }}" method="POST">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-danger">supprimer</button>
                             </form>

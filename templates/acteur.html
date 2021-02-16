@@ -21,29 +21,39 @@
         {% endif %}
     {% endif %}
     
-    <form action="addact">
+    <form action="addact" method="POST">
         {% csrf_token %}
         <div class="row">
             <div>
+                <div class="form-inline">
                 <label for="nom_act">Nom :</label>
                 <input type="text" name="nom_act" id="nom_act" class="form-control">
+                </div>
+                <div class="form-inline">
                 <label for="prenom_act">Prenom :</label>
                 <input type="text" name="prenom_act" id="prenom_act" class="form-control">
+                </div>
+                <div class="form-inline">
                 <label for="num_id">Numero d'identite :</label>
                 <input type="text" name="num_id" id="num_id" class="form-control">
+                </div>
             </div>
             <div>
+                <div class="form-inline">
                 <label for="num_tel">Numero téléphone :</label>
                 <input type="text" name="num_tel" id="num_tel">
+                </div>
+                <div class="form-inline">
                 <label for="etat_act">Etat :</label>
                 <select name="etat_act" id="etat_act">
                     <option value="non bloquer" class="non bloquer">debloquer</option>
                     <option value="bloquer" class="bloquer">bloquer </option>
                 </select>
+                </div>
             </div>
         </div>
         <div>
-            <button type="submit" class="form-control">Enregistrer</button>
+            <button type="submit" class="btn btn-primary">Enregister</button>
         </div>
     </form>
     <div>
@@ -52,7 +62,7 @@
                 <label for="cherch_act">Numero téléphone :</label>
                 <input type="text" name="cherch_act" id="cherch_act">
                 <button type="submit" class="btn btn-outline-primary">Chercher</button>
-                <button type="button" class="btn btn-outline-primary">OK</button>
+                <button type="button" class="btn btn-outline-primary"><a href="{% url 'act_url'%}">OK</a></button>
             </form>
         </div>
         <table class="table table-light">
@@ -76,13 +86,13 @@
                         <td>{{item.telephone_act}}</td>
                         <td>{{item.etat_act}}</td>
                         <td>
-                            <form action="edtact/{{item.id}}">
+                            <form action="edtact/{{item.id}}" method="POST">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-primary">editer</button>
                             </form>
                         </td>
                         <td>
-                            <form action="delact{{item.id}}">
+                            <form action="delact/{{item.id}}" method="POST">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-danger">supprimer</button>
                             </form>
