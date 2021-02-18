@@ -27,25 +27,25 @@
             <div>
                 <div class="form-inline">
                 <label for="nom_act">Nom :</label>
-                <input type="text" name="nom_act" id="nom_act" class="form-control">
+                <input type="text" name="nom_act" id="nom_act" class="form-control" autocomplete="off">
                 </div>
                 <div class="form-inline">
                 <label for="prenom_act">Prenom :</label>
-                <input type="text" name="prenom_act" id="prenom_act" class="form-control">
+                <input type="text" name="prenom_act" id="prenom_act" class="form-control" autocomplete="off">
                 </div>
                 <div class="form-inline">
                 <label for="num_id">Numero d'identite :</label>
-                <input type="text" name="num_id" id="num_id" class="form-control">
+                <input type="text" name="num_id" id="num_id" class="form-control" autocomplete="off">
                 </div>
             </div>
             <div>
                 <div class="form-inline">
                 <label for="num_tel">Numero téléphone :</label>
-                <input type="text" name="num_tel" id="num_tel">
+                <input type="text" name="num_tel" id="num_tel" class="form-control" autocomplete="off">
                 </div>
                 <div class="form-inline">
                 <label for="etat_act">Etat :</label>
-                <select name="etat_act" id="etat_act">
+                <select name="etat_act" id="etat_act" class=" my_chosen " style="width: 200px;">
                     <option value="non bloquer" class="non bloquer">debloquer</option>
                     <option value="bloquer" class="bloquer">bloquer </option>
                 </select>
@@ -57,23 +57,31 @@
         </div>
     </form>
     <div>
-        <div>
-            <form action="{% url 'chr_act_url' %}" method="GET" >
-                <label for="cherch_act">Numero téléphone :</label>
-                <input type="text" name="cherch_act" id="cherch_act">
-                <button type="submit" class="btn btn-outline-primary">Chercher</button>
-                <button type="button" class="btn btn-outline-primary"><a href="{% url 'act_url'%}">OK</a></button>
-            </form>
-        </div>
-        <table class="table table-light">
+       
+        <table table id="dtBasicExample" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
             <thead>
-                <tr >
-                    <th >Nom</th>
-                    <th >Prenom</th>
-                    <th >Numero d'identité</th>
-                    <th >Numero de téléphone </th>
-                    <th >Etat</th>
-                    <th colspan="2" ></th>
+                <tr>
+                    <th class="th-sm">Nom
+              
+                    </th>
+                    <th class="th-sm">Prenom
+              
+                    </th>
+                    <th class="th-sm">Numero d'identité
+              
+                    </th>
+                    <th class="th-sm">Numero de téléphone 
+              
+                    </th>
+                    <th class="th-sm">Etat
+              
+                    </th>
+                    <th >
+              
+                  </th>
+                  <th  >
+              
+                  </th>
                 </tr>
             </thead>
             <tbody>
@@ -88,13 +96,13 @@
                         <td>
                             <form action="edtact/{{item.id}}" method="POST">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-primary">editer</button>
+                                <button type="submit" class="btn btn-primary" style="padding-top:2px;padding-bottom: 2px;">editer</button>
                             </form>
                         </td>
                         <td>
                             <form action="delact/{{item.id}}" method="POST">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-danger">supprimer</button>
+                                <button type="submit" class="btn btn-danger" style="padding-top:2px;padding-bottom: 2px;">supprimer</button>
                             </form>
                         </td>
                     </tr>
@@ -105,6 +113,31 @@
                 {% endfor %}
             
             </tbody>
+            <tfoot>
+                <tr>
+                    <th >Nom
+              
+                    </th>
+                    <th >Prenom
+              
+                    </th>
+                    <th >Numero d'identité
+              
+                    </th>
+                    <th >Numero de téléphone 
+              
+                    </th>
+                    <th >Etat
+              
+                    </th>
+                    <th  >
+              
+                    </th>
+                    <th >
+                
+                    </th>
+                </tr>
+              </tfoot>
         </table>
     </div>
 {% endblock content %}

@@ -24,21 +24,21 @@
 <form action="{% url 'up_actgrp_url' acteur_select.id %}" method="POST">
     {% csrf_token %}
     <label for="select_act">Acteur :</label>
-    <select class="form-control chosen" name="select_act"  id="select_act">
+    <select class="my_chosen" name="select_act"  id="select_act">
         <option value="{{acteur_select.acteur}}" class="{{acteur_select.acteur__nom_act}}">{{acteur_select.acteur__nom_act}} {{acteur_select.acteur__prenom_act}}  {{acteur_select.acteur__telephone_act}}</option>
         {% for item in acteurs %}
                 <option value="{{item.id}}" class="{{item.nom_act}}">{{item.nom_act}} {{item.prenom_act}}  {{item.telephone_act}}</option>
         {% endfor %}
     </select>
     <label for="select_grp">Groupe :</label>
-    <select class="form-control chosen" name="select_grp"  id="select_grp">
+    <select class="my_chosen" name="select_grp"  id="select_grp">
         <option value="{{groupe_select.groupe}}" class="{{groupe_select.groupe__nom_groupe}}">{{groupe_select.groupe__nom_groupe}}</option>
         {% for item in groupes %}
             <option value="{{item.id}}" class="{{item.nom_groupe}}">{{item.nom_groupe}}</option>
         {% endfor %}
     </select>
     <label for="etat_actgrp">Etat de l'acteur :</label>
-    <select name="etat_actgrp" id="etat_actgrp">
+    <select name="etat_actgrp" id="etat_actgrp" class="my_chosen">
         {% if etat.etat_act_group == 'non bloquer' %}
             <option value="non bloquer" >debloquer</option>
             <option value="bloquer">bloquer </option>

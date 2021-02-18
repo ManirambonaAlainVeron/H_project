@@ -24,7 +24,7 @@
     <form action="addcm" method="POST">
         {% csrf_token %}
         <label for="select_pro">Province :</label>
-        <select class="form-control chosen" name="select_pro"  id="select_pro">
+        <select class="form-control my_chosen" name="select_pro"  id="select_pro">
             <option value="">Selectionnez la province</option>
             {% for item in provinces %}
                 <option value="{{item.id}}" class="{{item.nom_pro}}">{{item.nom_pro}}</option>
@@ -35,19 +35,14 @@
         <button type="submit" class="btn btn-primary">Enregistrer</button>
     </form>
     <div>
-        <div>
-            <form action="{% url 'chr_cm_url' %}" method="GET" >
-                <input type="text" name="cherch_com" id="cherch_com" autocomplete="off" placeholder="Checher par nom commune">
-                <button type="submit" class="btn btn-outline-primary">Chercher</button>
-                <button type="button" class="btn btn-outline-primary"><a href="{% url 'cm_url'%}">OK</a></button>
-            </form>
-        </div>
-        <table class="table table-light">
+        
+        <table table id="dtBasicExample" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
             <thead>
                 <tr >
-                    <th >Province</th>
-                    <th >Commune</th>
-                    <th colspan="2" ></th>
+                    <th class="th-sm">Province</th>
+                    <th class="th-sm">Commune</th>
+                    <th class="th-sm"></th>
+                    <th class="th-sm"></th>
                 </tr>
             </thead>
             <tbody>
@@ -59,13 +54,13 @@
                         <td>
                             <form action="edtcm/{{item.id}}" method="POST">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-primary">editer</button>
+                                <button type="submit" class="btn btn-primary" style="padding-top:2px;padding-bottom: 2px;">editer</button>
                             </form>
                         </td>
                         <td>
                             <form action="delcm/{{item.id}}" method="POST">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-danger">supprimer</button>
+                                <button type="submit" class="btn btn-danger" style="padding-top:2px;padding-bottom: 2px;">supprimer</button>
                             </form>
                         </td>
                     </tr>
@@ -76,6 +71,14 @@
                 {% endfor %}
             
             </tbody>
+            <tfoot>
+                <tr >
+                    <th >Province</th>
+                    <th >Commune</th>
+                    <th ></th>
+                    <th ></th>
+                </tr>
+            </tfoot>
         </table>
     </div>   
 {% endblock content %}

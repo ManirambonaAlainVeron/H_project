@@ -3,18 +3,142 @@ from django.http import request
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from django.db.utils import IntegrityError
+from django.db.utils import IntegrityError 
+from django.core.exceptions import ObjectDoesNotExist
 from .models import Province, Colline, Commune, Acteur, Acteur_groupe, Utilisateur, Groupe, Categorie, Reports, Reponse
 import ast
 from django.contrib.auth import authenticate, login, logout
 
 # Create your views here.
+
+#Auth
 def my_auth(request):
     return render(request,"Authentification.html")
+
+def connexion_utilisateur(request):
+     if request.method == 'POST':
+        username = request.POST.get('txt_login')
+        password = request.POST.get('txt_pass')
+        if len(username) != 0 or len(password) != 0:
+            user = authenticate(username=username, password=password)
+            if user:
+                try:
+                    profil = Utilisateur.objects.values(
+                        'profil').get(user__username=user)
+                except ObjectDoesNotExist:
+                    messages.info(request, "Impossible de se connecter, réessayez plus tard!")
+                    type_msg = "error"
+                    return render(request,"Authentification.html",{'type_msg':type_msg})
+                if profil['profil'] == "admin":
+                    login(request, user)
+                    return redirect("act_url")
+                else:
+                    login(request, user)
+                    return redirect("env_url")
+            else:
+                type_msg = "error"
+                messages.info(request, "Echec de connexion, le numero ou le mot de passe est incorrecte ou tu es desactivé !")
+                return render(request,"Authentification.html",{'type_msg':type_msg})
+        else:
+            messages.info(request,"Entrez le numero et le mot de passe svp!")
+            type_msg = "error"
+            return render(request,"Authentification.html",{'type_msg':type_msg})
+
+def deconnexion_utilisateur(request):
+    logout(request)
+    return redirect("auth_url")
+            
+#env_sms
+def afficher_envoyer_sms(request):
+    groupes = Groupe.objects.all().order_by("nom_groupe")
+    return render (request, "envoyer_sms.html",locals())
+
+def afficher_sms_envoye(request):
+    sms_envoyes = Reponse.objects.values('id','contenu_mes','date_mes','heure_mes','acteur__telephone_act','utilisateur__prenom_uti','acteur__prenom_act').order_by('date_mes','heure_mes')
+    return render(request, "afficher_sms_envoyer.html", locals())
+
+def supprimer_sms_envoyer(request, id_msg):
+    Reponse.objects.get(pk = id_msg).delete()
+    messages.info(request,"La suppresion est reussie avec succes !")
+    return redirect("affenv_url")
+
+def envoyer_sms(request):
+    if request.method == "POST":
+        typ = request.POST.get('type')
+        numero = request.POST.get('num').strip()
+        grp = request.POST.get('select_grp')
+        msg = request.POST.get('msg').strip()
+        if len(typ) != 0:
+                if typ == "acteur":
+                    if len(numero) == 0:
+                        groupes = Groupe.objects.all().order_by("nom_groupe")
+                        messages.info(request,"Entrez le numero du destinateur svp !")
+                        type_msg = "error"
+                        return render (request, "envoyer_sms.html",{'type_msg':type_msg})
+                    else:
+                        if len(msg) == 0:
+                            groupes = Groupe.objects.all().order_by("nom_groupe")
+                            messages.info(request,"Tapez le message svp !")
+                            type_msg = "error"
+                            return render (request, "envoyer_sms.html",locals())
+                        else:
+                            #envoyer a un acteur
+                            if Acteur.objects.filter(telephone_act=numero, etat_act="non bloquer").exists():
+                                id_act = Acteur.objects.values('id').get(telephone_act=numero)
+                                username_util = request.user.username
+                                id_uti = Utilisateur.objects.values('id').get(user__username=username_util)
+                                #----------send SMS----------
+
+                                messages.info(request,"Message envoyé!")
+                                return render (request, "envoyer_sms.html",locals())
+                            else:
+                                groupes = Groupe.objects.all().order_by("nom_groupe")
+                                messages.info(request,"Echec,numero inconu ou bien l'acteur est bloqué !")
+                                type_msg = "error"
+                                return render (request, "envoyer_sms.html",locals()) 
+                            #envoyer a un acteur
+                else:
+                    if len(grp) == 0:
+                        groupes = Groupe.objects.all().order_by("nom_groupe")
+                        messages.info(request,"Selectionnez le groupe destinateur svp !")
+                        type_msg = "error"
+                        return render (request, "envoyer_sms.html",locals())
+                    else:
+                        if len(msg) == 0:
+                            groupes = Groupe.objects.all().order_by("nom_groupe")
+                            messages.info(request,"Tapez le message svp !")
+                            type_msg = "error"
+                            return render (request, "envoyer_sms.html",locals())
+                        else:
+                        #envoyer a un groupe
+                            if Acteur_groupe.objects.filter(groupe=grp, etat_act_group="non bloquer"):
+                                username_util = request.user.username
+                                id_uti = Utilisateur.objects.values('id').get(user__username=username_util)
+                                #----select tous les membres(id,number)
+                                list_member = Acteur_groupe.objects.values('acteur','acteur__telephone_act').filter(groupe=grp)
+                                #----send SMS------
+
+                                messages.info(request,"Message envoyé à tous les membres du groupe!")
+                                return render (request, "envoyer_sms.html",locals())
+                            else:
+                                groupes = Groupe.objects.all().order_by("nom_groupe")
+                                messages.info(request,"Echec,le groupe n'a pas des membres ou bien ils sont bloqués !")
+                                type_msg = "error"
+                                return render (request, "envoyer_sms.html",{'type_msg':type_msg})
+        else:
+            groupes = Groupe.objects.all().order_by("nom_groupe")
+            messages.info(request,"Selectionnez le type du destinateur svp !")
+            type_msg = "error"
+            return render (request, "envoyer_sms.html",{'type_msg':type_msg})
+
 # provinces
 def afficher_province(request):
-    provinces = Province.objects.all().order_by("id")
-    return render(request,"province.html",locals())
+    try:
+        user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+        provinces = Province.objects.all().order_by("id")
+        return render(request,"province.html",locals())
+    except ObjectDoesNotExist:
+        return redirect("auth_url")
 
 def ajouter_province(request):
     if request.method == "POST":
@@ -54,9 +178,13 @@ def update_province(request, id_p):
 
 #commune
 def afficher_commune(request):
-    communes = Commune.objects.values('id','province__nom_pro','nom_com').order_by("id")
-    provinces = Province.objects.all().order_by("nom_pro")
-    return render(request, "commune.html", locals())
+    try:
+        user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+        communes = Commune.objects.values('id','province__nom_pro','nom_com').order_by("id")
+        provinces = Province.objects.all().order_by("nom_pro")
+        return render(request, "commune.html", locals())
+    except ObjectDoesNotExist:
+        return redirect("auth_url")
 
 def ajouter_commune(request):
     if request.method == "POST":
@@ -113,9 +241,9 @@ def update_commune(request, id_cm):
             messages.info(request,"La modification est reussie avec succes !")
             return redirect("cm_url")
 
-def chercher_commune(request):
+'''def chercher_commune(request):
     if request.method == 'GET':
-        nom = request.GET.get('cherch_com')
+        nom = request.GET.get('cherch_com').strip()
         if len(nom) == 0:
             messages.info(request, "Saisissez le nom de la commune à chercher svp !")
             return redirect('cm_url')
@@ -127,14 +255,18 @@ def chercher_commune(request):
                 messages.info(request, "La commune n'existe pas dans le system ou verifier l'orthographe svp !")
                 return redirect('cm_url')
             else:
-                return render(request, "commune.html",{'communes':liste})
+                return render(request, "commune.html",{'communes':liste})'''
 
 #colline
 def afficher_colline(request):
-    acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').filter(etat_act='non bloquer').order_by("nom_act")
-    communes = Commune.objects.all().order_by("id")
-    collines = Colline.objects.values('id','commune__nom_com','nom_col','acteur__nom_act','acteur__prenom_act','acteur__telephone_act').order_by("id")
-    return render(request, "colline.html", locals())
+    try:
+        user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+        acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').filter(etat_act='non bloquer').order_by("nom_act")
+        communes = Commune.objects.all().order_by("id")
+        collines = Colline.objects.values('id','commune__nom_com','nom_col','acteur__nom_act','acteur__prenom_act','acteur__telephone_act').order_by("id")
+        return render(request, "colline.html", locals())
+    except ObjectDoesNotExist:
+        return redirect("auth_url")
 
 def ajouter_colline(request):
     if request.method == "POST":
@@ -207,9 +339,9 @@ def update_colline(request, id_co):
             messages.info(request,"La modification est reussie avec succes !")
             return redirect("col_url")
 
-def chercher_colline(request):
+'''def chercher_colline(request):
     if request.method == 'GET':
-        nom = request.GET.get('cherch_col')
+        nom = request.GET.get('cherch_col').strip()
         if len(nom) == 0:
             messagess.info(request, "Saisissez le nom de la colline à chercher svp !")
             return redirect('col_url')
@@ -221,13 +353,17 @@ def chercher_colline(request):
                 messagess.info(request, "La colline n'existe pas dans le system ou verifier l'orthographe svp !")
                 return redirect('col_url')
             else:
-                return render(request, "colline.html",{'collines':liste})
+                return render(request, "colline.html",{'collines':liste})'''
 
 
 # categorie
 def afficher_categorie(request):
-    categories = Categorie.objects.all().order_by("id")
-    return render(request,"categorie.html",locals())
+    try:
+        user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+        categories = Categorie.objects.all().order_by("id")
+        return render(request,"categorie.html",locals())
+    except ObjectDoesNotExist:
+        return redirect("auth_url")
 
 def ajouter_categorie(request):
     if request.method == "POST":
@@ -268,8 +404,12 @@ def update_categorie(request, id_cat):
 
 # groupe
 def afficher_groupe(request):
-    groupes = Groupe.objects.all().order_by("id")
-    return render(request,"groupe.html",locals())
+    try:
+        user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+        groupes = Groupe.objects.all().order_by("id")
+        return render(request,"groupe.html",locals())
+    except ObjectDoesNotExist:
+        return redirect("auth_url")
 
 def ajouter_groupe(request):
     if request.method == "POST":
@@ -310,8 +450,12 @@ def update_groupe(request, id_g):
 
 #acteur
 def afficher_acteur(request):
-    acteurs = Acteur.objects.all().order_by("id")
-    return render(request,"acteur.html",locals())
+    try:
+        user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+        acteurs = Acteur.objects.all().order_by("id")
+        return render(request,"acteur.html",locals())
+    except ObjectDoesNotExist:
+        return redirect("auth_url")
 
 def ajouter_acteur(request):
     if request.method == "POST":
@@ -336,10 +480,16 @@ def ajouter_acteur(request):
             type_msg = "error"
             return render(request,"acteur.html",{'type_msg':type_msg,'acteurs':acteurs})
         else:
-            act = Acteur(nom_act = nom, prenom_act = prenom, telephone_act = tel, num_ide_act = identite, etat_act = etat)
-            act.save()
-            messages.info(request, "Enregistrement reussi avec succes !")
-            return redirect("act_url")
+            if Acteur.objects.filter(telephone_act=tel).exists():
+                acteurs = Acteur.objects.all().order_by("id")
+                messages.info(request,"Echec, ce numero existe déjà la duplication des numero est interdit !")
+                type_msg = "error"
+                return render(request,"acteur.html",{'type_msg':type_msg,'acteurs':acteurs})
+            else:
+                act = Acteur(nom_act = nom, prenom_act = prenom, telephone_act = tel, num_ide_act = identite, etat_act = etat)
+                act.save()
+                messages.info(request, "Enregistrement reussi avec succes !")
+                return redirect("act_url")
 
 def supprimer_acteur(request, id_act): 
     Acteur.objects.get(pk = id_act).delete()
@@ -378,12 +528,14 @@ def update_acteur(request, id_act):
             messages.info(request,"La modification est reussie avec succes !")
             return redirect("act_url")
 
-def chercher_acteur(request):
+'''def chercher_acteur(request):
     if request.method == 'GET':
-        numero = request.GET.get('cherch_act')
+        numero = request.GET.get('cherch_act').strip()
         if len(numero) == 0:
+            acteurs = Acteur.objects.all().order_by("id")
             messages.info(request, "Saisissez le numero de l'acteur communauteur à chercher svp !")
-            return redirect('act_url')
+            type_msg = "error"
+            return render(request,"acteur.html",{'type_msg':type_msg,'acteurs':acteurs})
         else:
             liste = Acteur.objects.values('id','nom_act','prenom_act','num_ide_act','telephone_act','etat_act').filter(telephone_act=numero)
             nbr = liste.count()
@@ -392,15 +544,19 @@ def chercher_acteur(request):
                 messages.info(request, "L'acteur n'existe pas dans le system ou bien verifier les numero !")
                 return redirect('act_url')
             else:
-                return render(request, "acteur.html",{'acteurs':liste})
+                return render(request, "acteur.html",{'acteurs':liste})'''
 
 
 #acteur_groupe
 def afficher_acteur_groupe(request):
-    acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').filter(etat_act='non bloquer').order_by("nom_act")
-    groupes = Groupe.objects.all().order_by("id")
-    acteur_groupe = Acteur_groupe.objects.values('id','acteur__nom_act','acteur__prenom_act','acteur__telephone_act','groupe__nom_groupe','etat_act_group').order_by("id")
-    return render(request, "acteur_groupe.html", locals())
+    try:
+        user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+        acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').filter(etat_act='non bloquer').order_by("nom_act")
+        groupes = Groupe.objects.all().order_by("id")
+        acteur_groupe = Acteur_groupe.objects.values('id','acteur__nom_act','acteur__prenom_act','acteur__telephone_act','groupe__nom_groupe','etat_act_group').order_by("id")
+        return render(request, "acteur_groupe.html", locals())
+    except ObjectDoesNotExist:
+        return redirect("auth_url")
 
 def retirer_acteur_groupe(request,id_actgrp):
     act = Acteur_groupe.objects.values('acteur__nom_act','acteur__prenom_act').get(pk = id_actgrp)
@@ -433,9 +589,9 @@ def ajouter_acteur_groupe(request):
                 messages.info(request, "Enregistrement reussi avec succes !")
                 return redirect("actgrp_url")
 
-def chercher_acteur_groupe_num(request):
+'''def chercher_acteur_groupe_num(request):
     if request.method == 'GET':
-        num = request.GET.get('cherch_actgrp')
+        num = request.GET.get('cherch_actgrp').strip()
         num.trim()
         if len(num) == 0:
             acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').order_by("nom_act")
@@ -455,12 +611,12 @@ def chercher_acteur_groupe_num(request):
                 messages.info(request, "L'acteur appartient à aucun groupe !")
                 return render(request,"acteur_groupe.html",locals())
             else:
-                return render(request, "acteur_groupe.html",{'acteur_groupe':liste})
+                return render(request, "acteur_groupe.html",{'acteur_groupe':liste})'''
 
 
-def chercher_acteur_groupe_grp(request):
+'''def chercher_acteur_groupe_grp(request):
     if request.method == 'GET':
-        grp = request.GET.get('cherch_grpact')
+        grp = request.GET.get('cherch_grpact').strip()
         if len(grp) == 0:
             messages.info(request, "Saisissez le nom du groupe à chercher svp !")
             acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').order_by("nom_act")
@@ -476,7 +632,7 @@ def chercher_acteur_groupe_grp(request):
                 messages.info(request, "Le groupe a aucun acteur !")
                 return redirect('act_actgrp_url')
             else:
-                return render(request, "acteur_groupe.html",{'acteur_groupe':liste})
+                return render(request, "acteur_groupe.html",{'acteur_groupe':liste})'''
 
 
 def editer_acteur_groupe(request, id_actgrp):
@@ -512,8 +668,12 @@ def update_acteur_groupe(request, id_actgrp):
 
 #utilisateur
 def afficher_utilisateur(request):
-    utilisateurs = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'num_id_uti','user__username', 'profil', 'user__is_active').order_by("id")
-    return render(request,"utilisateur.html",locals())
+    try:
+        user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+        utilisateurs = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'num_id_uti','user__username', 'profil', 'user__is_active').order_by("id")
+        return render(request,"utilisateur.html",locals())
+    except ObjectDoesNotExist:
+        return redirect("auth_url")
 
 def ajouter_utilisateur(request):
     if request.method == "POST":
@@ -532,20 +692,29 @@ def ajouter_utilisateur(request):
         else:
             password_confirm = request.POST.get('txt_conf')
             if password != password_confirm:
+                utilisateurs = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'num_id_uti','user__username', 'profil', 'user__is_active').order_by("id")
                 type_msg = "error"
-                messages.info(request, "Mot de passe et son confirmation n'est pas identique !")
+                messages.info(request, "Echec, mot de passe et la confirmation n'est pas identique !")
                 return render(request,"utilisateur.html",{'type_msg':type_msg,'utilisateurs':utilisateurs})
             else:
-                try:
-                    user = User.objects.create_user(username=telephone, password=password, is_active=etat)
-                except IntegrityError :
+                if Utilisateur.objects.filter(user__username=telephone).exists():
+                    utilisateurs = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'num_id_uti','user__username', 'profil', 'user__is_active').order_by("id")
                     type_msg = "error"
-                    messages.info(request, "Echec!! le numero ou le mot de passe existe déjà !")
+                    messages.info(request, "Echec! ce numero existe déjà la duplication des numero de téléphone est interdit !")
                     return render(request,"utilisateur.html",{'type_msg':type_msg,'utilisateurs':utilisateurs})
-                utilisateur = Utilisateur(user = user, nom_uti = nom, prenom_uti = prenom, num_id_uti = identifiant ,profil = profil)
-                utilisateur.save()
-                messages.info(request, "La creation d'un utilisateur reussi avec succes !")
-                return redirect('util_url')
+                else:
+                    try:
+                        user = User.objects.create_user(username=telephone, password=password, is_active=etat)
+                        utilisateur = Utilisateur(user = user, nom_uti = nom, prenom_uti = prenom, num_id_uti = identifiant ,profil = profil)
+                        utilisateur.save()
+                        messages.info(request, "La creation d'un utilisateur reussi avec succes !")
+                        return redirect('util_url')
+                    except IntegrityError :
+                        utilisateurs = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'num_id_uti','user__username', 'profil', 'user__is_active').order_by("id")
+                        type_msg = "error"
+                        messages.info(request, "Echec!! le numero ou le mot de passe existe déjà !")
+                        return render(request,"utilisateur.html",{'type_msg':type_msg,'utilisateurs':utilisateurs})
+                
 
 def supprimer_utilisateur(request, id_util): 
         utilisateur = Utilisateur.objects.get(pk=id_util)
@@ -583,9 +752,9 @@ def update_utilisateur(request, id_util):
             messages.info(request, "La modification est reussie avec succes !")
             return redirect("util_url")
 
-def chercher_utilisateur(request):
+'''def chercher_utilisateur(request):
     if request.method == 'GET':
-        numero = request.GET.get('cherch_util')
+        numero = request.GET.get('cherch_util').strip()
         if len(numero) == 0:
             messages.info(request, "Saisissez le numero de l'utilisateur à chercher svp !")
             return redirect('util_url')
@@ -598,11 +767,12 @@ def chercher_utilisateur(request):
                 messages.info(request, "L'utilisateur n'existe pas dans le system ou bien verifier le numero !")
                 return render(request,"utilisateur.html",{'utilisateurs':utilisateurs,'type_msg':type_msg})
             else:
-                return render(request, "utilisateur.html",{'utilisateurs':liste})
+                return render(request, "utilisateur.html",{'utilisateurs':liste})'''
 
 #change_pwd
 def afficher_change_pwd(request):
-    return render(request,"change_password.html")
+    user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+    return render(request,"change_password.html",locals())
 
 def change_pwd(request):
     if request.method == 'POST':

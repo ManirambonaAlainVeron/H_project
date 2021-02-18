@@ -24,7 +24,7 @@
     <form action="{% url 'up_col_url' collines.id %}" method="POST">
         {% csrf_token %}
           <label for="select_com">commune :</label>
-          <select class="form-control chosen" name="select_com"  id="select_com">
+          <select class="form-control my_chosen" name="select_com"  id="select_com">
               <option value="{{id_commune}}">{{nom_commune.nom_com}}</option>
               {% for item in communes %}
                   <option value="{{item.id}}" class="{{item.nom_com}}">{{item.nom_com}}</option>
@@ -33,7 +33,7 @@
           <label for="nom_com">Colline :</label>
           <input type="text" name="nom_com" id="nom_com" class="form-control" value="{{collines.nom_col}}">
           <label for="select_act">Acteur communauteur :</label>
-            <select class="form-control chosen" name="select_act"  id="select_act">
+            <select class="form-control my_chosen" name="select_act"  id="select_act">
                 <option value="{{acteur_select.acteur}}" class="{{acteur_select.acteur__nom_act}}">{{acteur_select.acteur__nom_act}} {{acteur_select.acteur__prenom_act}}  {{acteur_select.acteur__telephone_act}}</option>
                 {% for item in acteurs %}
                         <option value="{{item.id}}" class="{{item.nom_act}}">{{item.nom_act}} {{item.prenom_act}}  {{item.telephone_act}}</option>

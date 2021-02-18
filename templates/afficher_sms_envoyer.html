@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <div>
+        <table table id="dtBasicExample" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
+          <thead>
+            <tr>
+              <th class="th-sm">Message
+        
+              </th>
+              <th class="th-sm">Date
+        
+              </th>
+              <th class="th-sm">Heure
+        
+              </th>
+              <th class="th-sm">Numero du recepteur
+        
+              </th>
+              <th class="th-sm">Utilisateur
+        
+              </th>
+              <th class="th-sm">Acteur(Recepteur)
+        
+              </th>
+              <th >
+        
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+               {% for item in sms_envoyes %}  
+                    <tr>
+                        <td>{{item.contenu_mes}}</td>
+                        <td>{{item.date_mes}}</td>
+                        <td>{{item.heure_mes}}</td>
+                        <td>{{item.acteur__telephone_act}}</td>
+                        <td>{{item.utilisateur}}</td>
+                        <td>{{item.acteur__prenom_act}}</td>
+                        <td>
+                            <form action="delmsgenv/{{item.id}}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr >
+                        <h2><td colspan="4" >Il n'y a pas des sms envoyeés </td></h2>
+                    </tr>
+                {% endfor %}
+            
+            </tbody>
+            <tfoot>
+              <tr>
+                <th>Message
+                </th>
+                <th>Date
+                </th>
+                <th>Heure
+                </th>
+                <th>Numero du recepteur
+                </th>
+                <th>Utilisateur
+                </th>
+                <th>Acteur(Recepteur)
+                </th>
+                <th>
+                </th>
+              </tr>
+            </tfoot>
+        </table>
+    </div> 
+{% endblock content %}

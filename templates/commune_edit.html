@@ -24,7 +24,7 @@
     <form action="{% url 'up_cm_url' communes.id %}" method="POST">
         {% csrf_token %}
             <label for="select_pro">Province :</label>
-            <select class="form-control chosen" name="select_pro"  id="select_pro">
+            <select class="form-control my_chosen" name="select_pro"  id="select_pro">
                 <option value="{{id_province}}">{{nom_province}}</option>
                 {% for item in provinces %}
                     <option value="{{item.id}}" class="{{item.nom_pro}}">{{item.nom_pro}}</option>

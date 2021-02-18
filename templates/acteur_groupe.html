@@ -24,21 +24,21 @@
 <form action="addactgrp" method="POST">
     {% csrf_token %}
     <label for="select_act">Acteur communauteur :</label>
-    <select class="form-control chosen" name="select_act"  id="select_act">
+    <select class="my_chosen" name="select_act"  id="select_act">
         <option value="">Selectionnez l'acteur</option>
         {% for item in acteurs %}
                 <option value="{{item.id}}" class="{{item.nom_act}}">{{item.nom_act}} {{item.prenom_act}}  {{item.telephone_act}}</option>
         {% endfor %}
     </select>
     <label for="select_grp">Groupe :</label>
-    <select class="form-control chosen" name="select_grp"  id="select_grp">
+    <select class="my_chosen" name="select_grp"  id="select_grp">
         <option value="">Selectionnez le groupe</option>
         {% for item in groupes %}
             <option value="{{item.id}}" class="{{item.nom_groupe}}">{{item.nom_groupe}}</option>
         {% endfor %}
     </select>
     <label for="etat_actgrp">Etat de l'acteur :</label>
-    <select name="etat_actgrp" id="etat_actgrp">
+    <select name="etat_actgrp" id="etat_actgrp" class="my_chosen">
         <option value="non bloquer" class="non bloquer">debloquer</option>
         <option value="bloquer" class="bloquer">bloquer </option>
     </select>
@@ -47,33 +47,17 @@
     </div>
 </form>
 <div>
-    <div>
-        <div>
-            <form action="{% url 'chr_act_num_url' %}" method="GET" >
-                <label for="cherch_actgrp">Chercher l'acteur par son numero :</label>
-                <input type="text" name="cherch_actgrp" id="cherch_actgrp">
-                <button type="submit" class="btn btn-outline-primary">Chercher</button>
-                <button type="button" class="btn btn-outline-primary"><a href="{% url 'actgrp_url'%}">OK</a></button>
-            </form>
-        </div>
-        <div>
-            <form action="{% url 'chr_act_grp_url' %}" method="GET" >
-                <label for="cherch_grpact">Chercher par groupe :</label>
-                <input type="text" name="cherch_grpact" id="cherch_grpact">
-                <button type="submit" class="btn btn-outline-primary">Chercher</button>
-                <button type="button" class="btn btn-outline-primary"><a href="{% url 'actgrp_url'%}">OK</a></button>
-            </form>
-        </div>
-    </div>
-    <table class="table table-light">
+    
+    <table table id="dtBasicExample" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
         <thead>
             <tr >
-                <th >Nom</th>
-                <th >Prenom</th>
-                <th >Numero de téléphone </th>
-                <th >Groupe</th>
-                <th >Etat</th>
-                <th colspan="2" ></th>
+                <th class="th-sm">Nom</th>
+                <th class="th-sm">Prenom</th>
+                <th class="th-sm">Numero de téléphone </th>
+                <th class="th-sm">Groupe</th>
+                <th class="th-sm">Etat</th>
+                <th class="th-sm"></th>
+                <th class="th-sm"></th>
             </tr>
         </thead>
         <tbody>
@@ -89,13 +73,13 @@
                     <td>
                         <form action="edtactgrp/{{item.id}}" method="POST">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-primary">editer</button>
+                            <button type="submit" class="btn btn-primary" style="padding-top:2px;padding-bottom: 2px;">editer</button>
                         </form>
                     </td>
                     <td>
                         <form action="delactgrp/{{item.id}}" method="POST">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">retirer</button>
+                            <button type="submit" class="btn btn-danger" style="padding-top:2px;padding-bottom: 2px;">retirer</button>
                         </form>
                     </td>
                 </tr>
@@ -106,6 +90,17 @@
             {% endfor %}
         
         </tbody>
+        <tfoot>
+            <tr >
+                <th >Nom</th>
+                <th >Prenom</th>
+                <th >Numero de téléphone </th>
+                <th >Groupe</th>
+                <th >Etat</th>
+                <th ></th>
+                <th ></th>
+            </tr>
+        </tfoot>
     </table>
 </div>
 {% endblock content %}

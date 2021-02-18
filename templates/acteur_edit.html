@@ -36,7 +36,7 @@
                 <label for="num_tel">Numero téléphone :</label>
                 <input type="text" name="num_tel" value="{{acteur.telephone_act}}"  id="num_tel" class="form-control">
                 <label for="etat_act">Etat :</label>
-                <select name="etat_act" id="etat_act">
+                <select name="etat_act" id="etat_act" class="my_chosen">
                     {% if acteur.etat_act == 'non bloquer' %}
                         <option value="non bloquer" >debloquer</option>
                         <option value="bloquer">bloquer </option>

@@ -24,7 +24,7 @@
     <form action="addcol" method="POST">
         {% csrf_token %}
         <label for="select_com">Commune :</label>
-        <select class="form-control chosen" name="select_com"  id="select_com">
+        <select class="form-control my_chosen" name="select_com"  id="select_com">
             <option value="">Selectionnez la commune</option>
             {% for item in communes %}
                 <option value="{{item.id}}" class="{{item.nom_com}}">{{item.nom_com}}</option>
@@ -35,7 +35,7 @@
         <input type="text" name="nom_col" id="nom_col" class="form-control">
 
         <label for="select_act">Acteur communauteur :</label>
-        <select class="form-control chosen" name="select_act"  id="select_act">
+        <select class="form-control my_chosen" name="select_act"  id="select_act">
             <option value="">Selectionnez l'acteur</option>
             {% for item in acteurs %}
                     <option value="{{item.id}}" class="{{item.nom_act}}">{{item.nom_act}} {{item.prenom_act}}  {{item.telephone_act}}</option>
@@ -44,20 +44,15 @@
         <button type="submit" class="btn btn-primary">Attribuer</button>
     </form>
     <div>
-        <div>
-            <form action="{% url 'chr_col_url' %}" method="GET" >
-                <input type="text" name="cherch_col" id="cherch_col" placeholder="Colline à chercher">
-                <button type="submit" class="btn btn-outline-primary">Chercher</button>
-                <button type="button" class="btn btn-outline-primary"><a href="{% url 'col_url'%}">OK</a></button>
-            </form>
-        </div>
-        <table class="table table-light">
+        
+        <table table id="dtBasicExample" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
             <thead>
                 <tr >
-                    <th >Commune</th>
-                    <th >Colline</th>
-                    <th >Acteur communauteur</th>
-                    <th colspan="2" ></th>
+                    <th class="th-sm">Commune</th>
+                    <th class="th-sm">Colline</th>
+                    <th class="th-sm">Acteur communauteur</th>
+                    <th class="th-sm"></th>
+                    <th class="th-sm"></th>
                 </tr>
             </thead>
             <tbody>
@@ -70,13 +65,13 @@
                         <td>
                             <form action="edtcol/{{item.id}}" method="POST">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-primary">editer</button>
+                                <button type="submit" class="btn btn-primary" style="padding-top:2px;padding-bottom: 2px;">editer</button>
                             </form>
                         </td>
                         <td>
                             <form action="delcol/{{item.id}}" method="POST">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-danger">supprimer</button>
+                                <button type="submit" class="btn btn-danger" style="padding-top:2px;padding-bottom: 2px;">supprimer</button>
                             </form>
                         </td>
                     </tr>
@@ -87,6 +82,14 @@
                 {% endfor %}
             
             </tbody>
-        </table>
+            <tfoot>
+                <tr >
+                    <th >Commune</th>
+                    <th >Colline</th>
+                    <th >Acteur communauteur</th>
+                    <th ></th>
+                    <th ></th>
+                </tr>
+            </tfoot>
     </div>   
 {% endblock content %}

@@ -37,12 +37,12 @@
                 <label for="txt_tel">Numero téléphone :</label>
                 <input type="text" name="txt_tel" id="txt_tel" value="{{utilisateurs.user__username}}"  class="form-control">
                 <label for="txt_profil">Profil :</label>
-                <select name="txt_profil" id="txt_profil" class="form-control">
+                <select name="txt_profil" id="txt_profil" class="form-control my_chosen">
                         <option value="simple" >Simple</option>
                         <option value="admin" class="admin">Administrateur</option>
                 </select>
                 <label for="txt_etat">Etat :</label>
-                <select name="txt_etat" id="txt_etat" class="form-control">
+                <select name="txt_etat" id="txt_etat" class="form-control my_chosen">
                     {% if utilisateurs.user__is_active == True %}
                         <option value="True" >debloquer</option>
                         <option value="False">bloquer </option>

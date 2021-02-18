@@ -1,10 +1,12 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Login form using html5 and css3 animation effects</title>
+<title>Nyaruka</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" charset="utf-8"></script>
+<link rel="stylesheet" href="{% static 'css/bootstrap.min.css'%}"/>
 <style>
 *{
     margin: 0;
@@ -115,10 +117,32 @@ body {
 }
 }
 </style>
+
 </head>
 <body>
-  <form action="" id="login-form">
-      <h1>Bienvenue</h1>
+    
+    {% if type_msg %}
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if messages %}
+            <div class="alert alert-primary " role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+  <form action="{% url 'connect_url' %}" id="login-form" method="POST">
+      {% csrf_token %}
+      <h1>Humura</h1>
       <div class="input-box">
           <input type="text" placeholder="Numero ?" id="txt_login" name="txt_login">
       </div>
@@ -133,5 +157,15 @@ body {
         <p><a href="{% url 'chg_url' %}">Changer le mot de passe</a></p>
       </div>
   </form>
+  <script type="text/javascript">
+    function preventBack() { window.history.forward(); }  
+    setTimeout("preventBack()", 0);  
+    window.onunload = function () { null };  
+
+    setTimeout(function() {
+        $('.alert').slideUp('slow');}, 5000
+      );
+   </script>
+ 
 </body>
 </html>
