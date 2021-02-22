@@ -23,12 +23,13 @@
     {% endif %}
     <form action="{% url 'up_pro_url' provinces.id %}" method="POST">
         {% csrf_token %}
-        <div>
-            <input type="text" name="nom_prov" id="txt_prov" value="{{provinces.nom_pro}}" class="form-control" autocomplete="off">
+        <div class="row form-inline mt-5 justify-content-center align-items-center">
+            <label for="txt_prov" style="width: 100px;">Province :</label>
+            <input type="text" name="nom_prov" id="txt_prov" value="{{provinces.nom_pro}}" class="form-control" width="250px" autocomplete="off">
         </div>
-        <div>
-            <button type="submit" class="btn btn-outline-primary">OK</button>
+        <div class="row mt-5  justify-content-center align-items-center">
             <a  class="btn btn-default"  href="{% url 'pro_url' %}"><< Retourner</a>
+            <button type="submit" class="btn btn-outline-primary ml-3">OK</button>
         </div>
     </form>
 {% endblock content %}

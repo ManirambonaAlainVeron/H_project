@@ -23,26 +23,34 @@
 
 <form action="addactgrp" method="POST">
     {% csrf_token %}
-    <label for="select_act">Acteur communauteur :</label>
-    <select class="my_chosen" name="select_act"  id="select_act">
-        <option value="">Selectionnez l'acteur</option>
-        {% for item in acteurs %}
-                <option value="{{item.id}}" class="{{item.nom_act}}">{{item.nom_act}} {{item.prenom_act}}  {{item.telephone_act}}</option>
-        {% endfor %}
-    </select>
-    <label for="select_grp">Groupe :</label>
-    <select class="my_chosen" name="select_grp"  id="select_grp">
-        <option value="">Selectionnez le groupe</option>
-        {% for item in groupes %}
-            <option value="{{item.id}}" class="{{item.nom_groupe}}">{{item.nom_groupe}}</option>
-        {% endfor %}
-    </select>
-    <label for="etat_actgrp">Etat de l'acteur :</label>
-    <select name="etat_actgrp" id="etat_actgrp" class="my_chosen">
-        <option value="non bloquer" class="non bloquer">debloquer</option>
-        <option value="bloquer" class="bloquer">bloquer </option>
-    </select>
-    <div>
+    <div class="row form-inline  mt-5 justify-content-center align-items-center">
+        <div>
+            <label for="select_act" style="width: 180px;">Acteur communauteur :</label>
+            <select class="my_chosen" name="select_act"  id="select_act" style="width: 228px;">
+                <option value="">Selectionnez l'acteur</option>
+                {% for item in acteurs %}
+                        <option value="{{item.id}}" class="{{item.nom_act}}">{{item.nom_act}} {{item.prenom_act}}  {{item.telephone_act}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="ml-5">
+            <label for="select_grp" style="width: 100px;">Groupe :</label>
+            <select class="my_chosen" name="select_grp"  id="select_grp" style="width: 228px;">
+                <option value="">Selectionnez le groupe</option>
+                {% for item in groupes %}
+                    <option value="{{item.id}}" class="{{item.nom_groupe}}">{{item.nom_groupe}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="ml-5">
+            <label for="etat_actgrp" style="width: 150px;">Etat de l'acteur :</label>
+            <select name="etat_actgrp" id="etat_actgrp" class="my_chosen" style="width: 228px;">
+                <option value="non bloquer" class="non bloquer">debloquer</option>
+                <option value="bloquer" class="bloquer">bloquer </option>
+            </select>
+        </div>
+    </div>
+    <div class="row form-inline  mt-4 justify-content-center align-items-center">
         <button type="submit" class="btn btn-primary">Integrer l'acteur</button>
     </div>
 </form>

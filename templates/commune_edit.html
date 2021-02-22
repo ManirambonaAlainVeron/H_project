@@ -23,16 +23,24 @@
     
     <form action="{% url 'up_cm_url' communes.id %}" method="POST">
         {% csrf_token %}
-            <label for="select_pro">Province :</label>
-            <select class="form-control my_chosen" name="select_pro"  id="select_pro">
-                <option value="{{id_province}}">{{nom_province}}</option>
-                {% for item in provinces %}
-                    <option value="{{item.id}}" class="{{item.nom_pro}}">{{item.nom_pro}}</option>
-                {% endfor %}
-            </select>
-            <label for="nom_com">Commune :</label>
-            <input type="text" name="nom_com" id="nom_com" class="form-control" value="{{communes.nom_com}}" autocomplete="off">
-            <button type="submit" class="btn btn-outline-primary">OK</button>
+        <div class=" row mt-5 justify-content-center align-items-center">
+            <div class="form-inline">
+                <label for="select_pro" style="width: 100px;">Province :</label>
+                <select class="form-control my_chosen" name="select_pro"  id="select_pro" style="width: 228px;">
+                    <option value="{{id_province.province}}">{{nom_province}}</option>
+                    {% for item in provinces %}
+                        <option value="{{item.id}}" class="{{item.nom_pro}}">{{item.nom_pro}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-inline ml-4">
+                <label for="nom_com" style="width: 100px;">Commune :</label>
+                <input type="text" name="nom_com" id="nom_com" class="form-control" value="{{communes.nom_com}}" style="height: 25px;"  autocomplete="off">
+            </div>
+        </div>
+        <div class="form-inline mt-5 justify-content-center align-items-center"> 
             <a  class="btn btn-default"  href="{% url 'cm_url' %}"><< Retourner</a>
+            <button type="submit" class="btn btn-outline-primary mt-3">OK</button>
+        </div>  
     </form>
 {% endblock content %}

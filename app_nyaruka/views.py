@@ -234,8 +234,8 @@ def update_commune(request, id_cm):
             return redirect("cm_url")
         else:
             c = Commune.objects.get(pk = id_cm)
-            p = Province(id=pro)
-            c.province =p
+            c.province = Province(pro)
+            print("-------",Province(pro))
             c.nom_com = com
             c.save()
             messages.info(request,"La modification est reussie avec succes !")
@@ -742,13 +742,16 @@ def update_utilisateur(request, id_util):
         else:
             
             uti = Utilisateur.objects.get(pk = id_util)
-            uti.nom_util = nom
-            uti.prenom_util = prenom
+            print(telephone,"----",etat)
+            uti.nom_uti = nom
+            uti.prenom_uti = prenom
             uti.num_id_uti = identifiant
-            uti.user__username =telephone
             uti.profil = profil
-            uti.user__is_active = etat
+            u = uti.user
+            u.is_active = etat
+            u.username = telephone
             uti.save()
+            u.save()
             messages.info(request, "La modification est reussie avec succes !")
             return redirect("util_url")
 

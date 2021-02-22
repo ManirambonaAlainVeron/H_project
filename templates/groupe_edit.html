@@ -22,12 +22,13 @@
     {% endif %}
     <form action="{% url 'up_grp_url' groupes.id %}" method="POST">
         {% csrf_token %}
-        <div>
-            <input type="text" name="nom_grp" id="nom_grp" value="{{groupes.nom_groupe}}" class="form-control">
+        <div class="row form-inline mt-5 justify-content-center align-items-center">
+            <label for="nom_grp" style="width: 150px;">Nom du groupe :</label>
+            <input type="text" name="nom_grp" id="nom_grp" value="{{groupes.nom_groupe}}" class="form-control" style="width: 270px;">
         </div>
-        <div>
-            <button type="submit" class="btn btn-outline-primary">OK</button>
+        <div class="row mt-5  justify-content-center align-items-center">
             <a  class="btn btn-default"  href="{% url 'grp_url' %}"><< Retourner</a>
+            <button type="submit" class="btn btn-outline-primary ml-4">OK</button>
         </div>
     </form>        
 {% endblock content %}

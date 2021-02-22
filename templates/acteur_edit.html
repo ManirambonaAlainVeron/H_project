@@ -23,33 +23,43 @@
     
     <form action="{% url 'up_act_url' acteur.id %}" method="POST">
         {% csrf_token %}
-        <div class="row">
+        <div class="row mt-5  justify-content-center align-items-center">
             <div>
-                <label for="nom_act">Nom :</label>
-                <input type="text" name="nom_act" id="nom_act" value="{{acteur.nom_act}}"  class="form-control">
-                <label for="prenom_act">Prenom :</label>
-                <input type="text" name="prenom_act" id="prenom_act" value="{{acteur.prenom_act}}"  class="form-control">
-                <label for="num_id">Numero d'identite :</label>
-                <input type="text" name="num_id" id="num_id" value="{{acteur.num_ide_act}}"  class="form-control">
+                <div class="form-inline">
+                    <label for="nom_act" style="width: 150px;">Nom :</label>
+                    <input type="text" name="nom_act" id="nom_act" value="{{acteur.nom_act}}"  class="form-control" style="height: 25px;">
+                </div>
+                <div class="form-inline mt-4">
+                    <label for="prenom_act" style="width: 150px;">Prenom :</label>
+                    <input type="text" name="prenom_act" id="prenom_act" value="{{acteur.prenom_act}}"  class="form-control" style="height: 25px;">
+                </div>
+                <div class="form-inline mt-4">
+                    <label for="num_id" style="width: 150px;">Numero d'identite :</label>
+                    <input type="text" name="num_id" id="num_id" value="{{acteur.num_ide_act}}"  class="form-control" style="height: 25px;">
+                </div>
             </div>
-            <div>
-                <label for="num_tel">Numero téléphone :</label>
-                <input type="text" name="num_tel" value="{{acteur.telephone_act}}"  id="num_tel" class="form-control">
-                <label for="etat_act">Etat :</label>
-                <select name="etat_act" id="etat_act" class="my_chosen">
-                    {% if acteur.etat_act == 'non bloquer' %}
-                        <option value="non bloquer" >debloquer</option>
-                        <option value="bloquer">bloquer </option>
-                    {% else %}
-                        <option value="bloquer" >bloquer </option>
-                        <option value="non bloquer" >debloquer</option>
-                    {% endif %}
-                </select>
+            <div class="ml-5">
+                <div class="form-inline">
+                    <label for="num_tel" style="width: 150px;">Numero téléphone :</label>
+                    <input type="text" name="num_tel" value="{{acteur.telephone_act}}"  id="num_tel" class="form-control" style="height: 25px;">
+                </div>
+                <div class="form-inline mt-4">
+                    <label for="etat_act" style="width: 150px;">Etat :</label>
+                    <select name="etat_act" id="etat_act" class="my_chosen" style="width: 228px;">
+                        {% if acteur.etat_act == 'non bloquer' %}
+                            <option value="non bloquer" >debloquer</option>
+                            <option value="bloquer">bloquer </option>
+                        {% else %}
+                            <option value="bloquer" >bloquer </option>
+                            <option value="non bloquer" >debloquer</option>
+                        {% endif %}
+                    </select>
+                </div>
             </div>
         </div>
-        <div>
-            <button type="submit" class="btn btn-outline-primary">OK</button>
+        <div class="row mt-5  justify-content-center align-items-center">
             <a  class="btn btn-default"  href="{% url 'act_url' %}"><< Retourner</a>
+            <button type="submit" class="btn btn-outline-primary ml-4">OK</button>
         </div>
     </form>
 {% endblock content %}

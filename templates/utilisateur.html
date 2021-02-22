@@ -23,56 +23,56 @@
     
     <form action="addutil" method="POST">
         {% csrf_token %}
-        <div class="row">
+        <div class="row mt-4  justify-content-center align-items-center" >
             <div>
                 <div class="form-inline">
-                    <label for="txt_nom">Nom :</label>
-                    <input type="text" name="txt_nom" id="txt_nom" class="form-control" autocomplete="off">
+                    <label for="txt_nom" style="width: 150px;">Nom :</label>
+                    <input type="text" name="txt_nom" id="txt_nom" class="form-control" autocomplete="off" style="height: 25px;">
                 </div>
-                <div class="form-inline">
-                    <label for="txt_prenom">Prenom :</label>
-                    <input type="text" name="txt_prenom" id="txt_prenom" class="form-control" autocomplete="off">
+                <div class="form-inline mt-4">
+                    <label for="txt_prenom" style="width: 150px;text-align: justify;">Prenom :</label>
+                    <input type="text" name="txt_prenom" id="txt_prenom" class="form-control" autocomplete="off" style="height: 25px;">
                 </div>
-                <div class="form-inline">
-                    <label for="txt_num_id">Numero d'identite :</label>
-                    <input type="text" name="txt_num_id" id="txt_num_id" class="form-control" autocomplete="off">
+                <div class="form-inline mt-4">
+                    <label for="txt_num_id" style="width: 150px;">Numero d'identite :</label>
+                    <input type="text" name="txt_num_id" id="txt_num_id" class="form-control" autocomplete="off" style="height: 25px;">
                 </div>
-                <div class="form-inline">
-                    <label for="txt_tel">Numero téléphone :</label>
-                    <input type="text" name="txt_tel" id="txt_tel" class="form-control" autocomplete="off">
+                <div class="form-inline mt-4">
+                    <label for="txt_tel" style="width: 150px;">Numero téléphone :</label>
+                    <input type="text" name="txt_tel" id="txt_tel" class="form-control" autocomplete="off" style="height: 25px;">
                 </div>
             </div>
-            <div>
+            <div class="ml-5">
                 <div class="form-inline">
-                    <label for="txt_pass">Mot de passe :</label>
-                    <input type="password" name="txt_pass" id="txt_pass" class="form-control" autocomplete="off">
+                    <label for="txt_pass" style="width: 110px;">Mot de passe :</label>
+                    <input type="password" name="txt_pass" id="txt_pass" class="form-control" autocomplete="off" style="height: 25px;">
                 </div>
-                <div class="form-inline">
-                    <label for="txt_conf">Confirmation :</label>
-                    <input type="password" name="txt_conf" id="txt_conf" placeholder="tapez encore mot de passe" class="form-control" autocomplete="off">
+                <div class="form-inline mt-4">
+                    <label for="txt_conf" style="width: 110px;">Confirmation :</label>
+                    <input type="password" name="txt_conf" id="txt_conf" placeholder="tapez encore mot de passe" class="form-control" autocomplete="off" style="height: 25px;">
                 </div>
-                <div class="form-inline chosen">
-                    <label for="txt_profil">Profil :</label>
-                    <select name="txt_profil" id="txt_profil" class="form-control my_chosen">
+                <div class="form-inline chosen mt-4">
+                    <label for="txt_profil" style="width: 110px;">Profil :</label>
+                    <select name="txt_profil" id="txt_profil" class="form-control my_chosen" style="width: 228px;">
                         <option value="non bloquer" class="non bloquer">Selectionnez son profil</option>
                         <option value="admin" class="admin">Administrateur</option>
                         <option value="simple" class="simple">Simple</option>
                     </select>
                 </div>
-                <div class="form-inline">
-                    <label for="txt_etat">Etat :</label>
-                    <select name="txt_etat" id="txt_etat" class="form-control my_chosen">
+                <div class="form-inline mt-4">
+                    <label for="txt_etat" style="width: 110px;">Etat :</label>
+                    <select name="txt_etat" id="txt_etat" class="form-control my_chosen" style="width: 228px;">
                         <option value="True" class="True">debloquer</option>
                         <option value="False" class="False">bloquer </option>
                     </select>
                 </div>
             </div>
         </div>
-        <div>
+        <div class=" row mt-4 justify-content-center align-items-center">
             <button type="submit" class="btn btn-primary">Ajouter</button>
         </div>
     </form>
-        <div>
+        <div class="mt-4">
             
             <div> 
                 <table table id="dtBasicExample" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">

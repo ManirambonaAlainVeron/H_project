@@ -23,39 +23,55 @@
 
     <form action="{% url 'up_util_url' utilisateurs.id %}" method="POST">
         {% csrf_token %}
-        <div class="row">
+        <div class="row mt-5  justify-content-center align-items-center">
             <div>
-                <label for="txt_nom">Nom :</label>
-                <input type="text" name="txt_nom" id="txt_nom" value="{{utilisateurs.nom_uti}}"  class="form-control">
-                <label for="txt_prenom">Prenom :</label>
-                <input type="text" name="txt_prenom" id="txt_prenom" value="{{utilisateurs.prenom_uti}}"  class="form-control">
-                <label for="txt_num_id">Numero d'identite :</label>
-                <input type="text" name="txt_num_id" id="txt_num_id" value="{{utilisateurs.num_id_uti}}"  class="form-control">
-              
+                <div class="form-inline">
+                    <label for="txt_nom" style="width: 150px;">Nom :</label>
+                    <input type="text" name="txt_nom" id="txt_nom" value="{{utilisateurs.nom_uti}}"  class="form-control" style="height: 25px;">
+                </div>
+                <div class="form-inline mt-5">
+                    <label for="txt_prenom" style="width: 150px;">Prenom :</label>
+                    <input type="text" name="txt_prenom" id="txt_prenom" value="{{utilisateurs.prenom_uti}}"  class="form-control" style="height: 25px;">
+                </div>
+                <div class="form-inline mt-5">
+                    <label for="txt_num_id" style="width: 150px;">Numero d'identite :</label>
+                    <input type="text" name="txt_num_id" id="txt_num_id" value="{{utilisateurs.num_id_uti}}"  class="form-control" style="height: 25px;">
+                </div>
             </div>
-            <div>
-                <label for="txt_tel">Numero téléphone :</label>
-                <input type="text" name="txt_tel" id="txt_tel" value="{{utilisateurs.user__username}}"  class="form-control">
-                <label for="txt_profil">Profil :</label>
-                <select name="txt_profil" id="txt_profil" class="form-control my_chosen">
-                        <option value="simple" >Simple</option>
-                        <option value="admin" class="admin">Administrateur</option>
-                </select>
-                <label for="txt_etat">Etat :</label>
-                <select name="txt_etat" id="txt_etat" class="form-control my_chosen">
-                    {% if utilisateurs.user__is_active == True %}
-                        <option value="True" >debloquer</option>
-                        <option value="False">bloquer </option>
-                    {% else %}
-                        <option value="False" >bloquer </option>
-                        <option value="True" >debloquer</option>
-                    {% endif %}
-                </select>
+            <div class="ml-5">
+                <div class="form-inline">
+                    <label for="txt_tel" style="width: 150px;">Numero téléphone :</label>
+                    <input type="text" name="txt_tel" id="txt_tel" value="{{utilisateurs.user__username}}"  class="form-control" style="height: 25px; width: 230px;">
+                </div>
+                <div class="form-inline mt-5">
+                    <label for="txt_profil" style="width: 150px;">Profil :</label>
+                    <select name="txt_profil" id="txt_profil" class="form-control my_chosen"  style="width: 228px;">
+                        {% if utilisateurs.profil == "simple" %}
+                            <option value="simple" >Simple</option>
+                            <option value="admin" class="admin">Administrateur</option>
+                        {% else %}
+                            <option value="admin" class="admin">Administrateur</option>
+                            <option value="simple" >Simple</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <div class="form-inline mt-5">
+                    <label for="txt_etat" style="width: 150px;">Etat :</label>
+                    <select name="txt_etat" id="txt_etat" class="form-control my_chosen"  style="width: 228px;">
+                        {% if utilisateurs.user__is_active == True %}
+                            <option value="True" >debloquer</option>
+                            <option value="False">bloquer </option>
+                        {% else %}
+                            <option value="False" >bloquer </option>
+                            <option value="True" >debloquer</option>
+                        {% endif %}
+                    </select>
+                </div>
             </div>
         </div>
-        <div>
-            <button type="submit" class="btn btn-outline-primary">OK</button>
+        <div class="row mt-5  justify-content-center align-items-center">
             <a  class="btn btn-default"  href="{% url 'util_url' %}"><< Retourner</a>
+            <button type="submit" class="btn btn-outline-primary ml-5">OK</button>
         </div>
     </form>       
 {% endblock content %}
