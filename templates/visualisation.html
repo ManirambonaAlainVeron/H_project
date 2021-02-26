@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    {% if type_msg %}
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if messages %}
+            <div class="alert alert-primary " role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+            <form action="" method="GET">
+                <div class="row form-inline mt-5 justify-content-center align-items-center">
+                    <label for="select_typ_vis" style="width: 200px;">Visualisez des cas par :</label>
+                    <select class="form-control col-3" name="select_typ_vis"  id="select_typ_vis">
+                        <option value="">Selectionnez le type</option>
+                        <option value="colline">Colline</option>
+                        <option value="categorie">Categorie</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">Visualiser</button>
+                </div>
+                <div>
+                    
+                </div>
+            </form>
+{% endblock content %}

@@ -69,6 +69,19 @@ urlpatterns = [
 
     #env_sms
     path('env', views.afficher_envoyer_sms, name='env_url'),
+    path('env_sms', views.envoyer_sms, name='env_sms_url'),
     path('affenv', views.afficher_sms_envoye, name='affenv_url'),
     path('delmsgenv/<int:id_msg>', views.supprimer_sms_envoyer, name='del_msg_env_url'),
+
+    #report
+    path('rpt/', views.afficher_sms_recu, name='rpt_url'),
+    path('delrpt/<int:id_msg>', views.supprimer_sms_recu, name='del_msg_recu_url'),
+    path('catrpt<int:id_msg>', views.categorise_sms_recu, name='catrpt_url'),
+    path('updcatrpt/<int:id_msg>', views.update_cat_sms_recu, name='up_catrpt_url'),
+    path('reprpt/<int:id_msg>', views.repondre_sms_recu, name='reprpt_url'),
+    path('trsfrpt/<int:id_msg>', views.transferer_sms_recu, name='trsfrpt_url'),
+
+    #visualisation
+    path('vs', views.get_visauliser_page, name='vs_url'),
+    path('vsdata', views.visualiser_data, name='vs_data_url'),
 ]

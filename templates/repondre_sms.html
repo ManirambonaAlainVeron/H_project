@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
 
-
-
 {% block content %}
     {% if type_msg %}
         {% if messages %}
@@ -23,29 +21,18 @@
         {% endif %}
     {% endif %}
     
-    <form action="env_sms" method="POST" class="mt-5">
+    <form action="{% url 'env_sms_url' %}" method="POST" class="mt-5">
         {% csrf_token %}
-        <div class="form-inline mt-4 justify-content-center align-items-center">
+        <div class="row mt-5 h-100 justify-content-center align-items-center">
+            <div class="form-inline mt-4 justify-content-center align-items-center" hidden>
                 <label for="type_env" style="width: 110px;">Envoyer à :</label>
                 <select class="form-control my_chosen" name="type"  id="type_env">
-                    <option value="">Selectionnez</option>
                     <option value="acteur" class="acteur">Acteur communauteur</option>
-                    <option value="groupe" class="groupe">Groupe</option>
                 </select>
-        </div>
-        <div class="row mt-5 h-100 justify-content-center align-items-center">
-            <div class="form-inline">
-                <label for="num_act_envoyer" style="width: 100px;">Numero :</label>
-                <input type="text" name="num" id="num_act_envoyer" placeholder="numero"class="form-control " style="height: 25px;" placeholder="numero ?" >
             </div>
-            <div  class="form-inline ">
-                <label for="select_grp_envoyer" style="width: 100px;">Groupe :</label>
-                <select class="form-control my_chosen" name="select_grp"  id="select_grp_envoyer" >
-                    <option value="">Selectionnez le groupe</option>
-                    {% for item in groupes %}
-                        <option value="{{item.id}}" class="{{item.nom_groupe}}">{{item.nom_groupe}}</option>
-                    {% endfor %}
-                </select>
+            <div class="form-inline">
+                <label for="num" style="width: 100px;">Numero :</label>
+                <input type="text" name="num" id="num" value="{{report.acteur__telephone_act}}" placeholder="numero"class="form-control " style="height: 25px;"  >
             </div>
         </div>
         <div class="row mt-5 justify-content-center align-items-center">
@@ -53,10 +40,9 @@
             <textarea id="msg" class="form-control ml-3" name="msg" rows="4" style="width: 512px;" placeholder="Tapez votre message ici..."></textarea>
         </div>
         <div class="row mt-3 justify-content-center align-items-center">
-            <a  class="btn btn-default"  href="{% url 'rpt_url' %}"><< Aller dans sms reçu</a>
+            <a  class="btn btn-default"  href="{% url 'rpt_url' %}" style="text-decoration: none;"><< Messages reçu</a>
             <button type="submit" class="btn btn-primary mr-3 ml-3"> Envoyer ></button>
-            <a  class="btn btn-default"  href="{% url 'affenv_url' %}">Voir sms envoyés >></a>
+            <a  class="btn btn-default"  href="{% url 'affenv_url' %}" style="text-decoration: none;">Voir sms envoyés >></a>
         </div>
-    </form>
-    
+    </form>           
 {% endblock content %}

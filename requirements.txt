@@ -1,3 +1,9 @@
 Django==2.0
+fanstatic==1.1
+js.chosen==1.8.7
+js.jquery==3.3.1
+mysqlclient==2.0.3
 psycopg2==2.8.6
 pytz==2021.1
+shutilwhich==1.1.0
+WebOb==1.8.7

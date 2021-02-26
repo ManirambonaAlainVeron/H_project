@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
 
-
-
 {% block content %}
     {% if type_msg %}
         {% if messages %}
@@ -23,7 +21,7 @@
         {% endif %}
     {% endif %}
     
-    <form action="env_sms" method="POST" class="mt-5">
+    <form action="{% url 'env_sms_url' %}" method="POST" class="mt-5">
         {% csrf_token %}
         <div class="form-inline mt-4 justify-content-center align-items-center">
                 <label for="type_env" style="width: 110px;">Envoyer à :</label>
@@ -50,13 +48,13 @@
         </div>
         <div class="row mt-5 justify-content-center align-items-center">
             <label for="" >Message :</label>
-            <textarea id="msg" class="form-control ml-3" name="msg" rows="4" style="width: 512px;" placeholder="Tapez votre message ici..."></textarea>
+            <textarea id="msg" class="form-control ml-3" name="msg" rows="4" style="width: 512px;">{{report.contenu_mes}}</textarea>
         </div>
         <div class="row mt-3 justify-content-center align-items-center">
-            <a  class="btn btn-default"  href="{% url 'rpt_url' %}"><< Aller dans sms reçu</a>
+            <a  class="btn btn-default"  href="{% url 'rpt_url' %}" style="text-decoration: none;"><< Messages reçu</a>
             <button type="submit" class="btn btn-primary mr-3 ml-3"> Envoyer ></button>
-            <a  class="btn btn-default"  href="{% url 'affenv_url' %}">Voir sms envoyés >></a>
+            <a  class="btn btn-default"  href="{% url 'affenv_url' %}" style="text-decoration: none;">Voir sms envoyés >></a>
         </div>
     </form>
-    
+                
 {% endblock content %}

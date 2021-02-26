@@ -26,8 +26,8 @@ class Acteur(models.Model):
     
 class Colline(models.Model):
     nom_col = models.CharField(max_length=50)
-    commune = models.ForeignKey(Commune, on_delete=models.CASCADE)
-    acteur = models.ForeignKey(Acteur, on_delete=models.CASCADE)
+    commune = models.ForeignKey(Commune, on_delete=models.PROTECT)
+    acteur = models.ForeignKey(Acteur, on_delete=models.PROTECT)
 
     class Meta:
         db_table = 'Colline'
@@ -39,8 +39,8 @@ class Groupe(models.Model):
         db_table = 'Groupe'
 
 class Acteur_groupe(models.Model):
-    groupe = models.ForeignKey(Groupe, on_delete=models.CASCADE)
-    acteur = models.ForeignKey(Acteur, on_delete=models.CASCADE)
+    groupe = models.ForeignKey(Groupe, on_delete=models.PROTECT)
+    acteur = models.ForeignKey(Acteur, on_delete=models.PROTECT)
     etat_act_group = models.CharField(max_length=50)
 
     class Meta:
@@ -53,11 +53,11 @@ class Categorie(models.Model):
         db_table = 'Categorie'
 
 class Reports(models.Model):
-    acteur = models.ForeignKey(Acteur, on_delete=models.CASCADE)
+    acteur = models.ForeignKey(Acteur, on_delete=models.PROTECT)
     contenu_mes = models.TextField()
     date_mes = models.DateField(auto_now_add=True)
     heure_mes = models.TimeField(auto_now_add=True)
-    categories = models.ForeignKey(Categorie, on_delete=models.CASCADE)
+    categories = models.ForeignKey(Categorie, on_delete=models.PROTECT, default=1)
 
     class Meta:
         db_table = 'Reports'
@@ -68,17 +68,16 @@ class Utilisateur(models.Model):
     prenom_uti = models.CharField(max_length=50)
     num_id_uti = models.CharField(max_length=50)
     profil = models.CharField(max_length=50)
-    etat = models.CharField(max_length=50)
 
     class Meta:
         db_table = 'Utilisateur'
 
 class Reponse(models.Model):
-    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
-    acteur = models.ForeignKey(Acteur, on_delete=models.CASCADE)
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.PROTECT)
+    acteur = models.ForeignKey(Acteur, on_delete=models.PROTECT)
     contenu_mes = models.TextField()
-    date_mes = models.DateField(auto_now_add=True)
-    heure_mes = models.TimeField(auto_now_add=True)
+    date_mes = models.DateField()
+    heure_mes = models.TimeField()
     
     class Meta:
         db_table = 'Reponse'

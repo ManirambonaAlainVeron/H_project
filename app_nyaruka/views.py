@@ -3,11 +3,18 @@ from django.http import request
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from django.db.utils import IntegrityError 
+from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from .models import Province, Colline, Commune, Acteur, Acteur_groupe, Utilisateur, Groupe, Categorie, Reports, Reponse
 import ast
 from django.contrib.auth import authenticate, login, logout
+import urllib.parse
+from urllib.request import urlopen
+from datetime import datetime,timedelta
+from time import strftime
+import re
+from django.db.models import ProtectedError
+
 
 # Create your views here.
 
@@ -17,8 +24,8 @@ def my_auth(request):
 
 def connexion_utilisateur(request):
      if request.method == 'POST':
-        username = request.POST.get('txt_login')
-        password = request.POST.get('txt_pass')
+        username = request.POST.get('txt_login').strip()
+        password = request.POST.get('txt_pass').strip()
         if len(username) != 0 or len(password) != 0:
             user = authenticate(username=username, password=password)
             if user:
@@ -50,11 +57,13 @@ def deconnexion_utilisateur(request):
             
 #env_sms
 def afficher_envoyer_sms(request):
+    user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
     groupes = Groupe.objects.all().order_by("nom_groupe")
     return render (request, "envoyer_sms.html",locals())
 
 def afficher_sms_envoye(request):
-    sms_envoyes = Reponse.objects.values('id','contenu_mes','date_mes','heure_mes','acteur__telephone_act','utilisateur__prenom_uti','acteur__prenom_act').order_by('date_mes','heure_mes')
+    user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+    sms_envoyes = Reponse.objects.values('id','contenu_mes','date_mes','heure_mes','acteur__telephone_act','utilisateur__prenom_uti','acteur__prenom_act').order_by("-date_mes","-heure_mes")
     return render(request, "afficher_sms_envoyer.html", locals())
 
 def supprimer_sms_envoyer(request, id_msg):
@@ -65,38 +74,50 @@ def supprimer_sms_envoyer(request, id_msg):
 def envoyer_sms(request):
     if request.method == "POST":
         typ = request.POST.get('type')
-        numero = request.POST.get('num').strip()
         grp = request.POST.get('select_grp')
         msg = request.POST.get('msg').strip()
         if len(typ) != 0:
                 if typ == "acteur":
+                    numero = request.POST.get('num').strip()
                     if len(numero) == 0:
                         groupes = Groupe.objects.all().order_by("nom_groupe")
                         messages.info(request,"Entrez le numero du destinateur svp !")
                         type_msg = "error"
                         return render (request, "envoyer_sms.html",{'type_msg':type_msg})
                     else:
+                        
                         if len(msg) == 0:
                             groupes = Groupe.objects.all().order_by("nom_groupe")
                             messages.info(request,"Tapez le message svp !")
                             type_msg = "error"
                             return render (request, "envoyer_sms.html",locals())
                         else:
+                            print(msg,"--------------",numero,"----",typ)
                             #envoyer a un acteur
                             if Acteur.objects.filter(telephone_act=numero, etat_act="non bloquer").exists():
                                 id_act = Acteur.objects.values('id').get(telephone_act=numero)
                                 username_util = request.user.username
                                 id_uti = Utilisateur.objects.values('id').get(user__username=username_util)
                                 #----------send SMS----------
-
-                                messages.info(request,"Message envoyé!")
+                                msg = urllib.parse.quote(msg)
+                                source_num = "+25779612730".replace("+","")
+                                numero.replace("+","")
+                                url = "http://localhost:13013/cgi-bin/sendsms?username=humura&password=CHANGE-ME&from="+source_num+"&to="+numero+"&text="+msg+""
+                                urllib.request.urlopen(url)
+                                msg = msg.replace("%20"," ")
+                                dat = datetime.today()
+                                her = (datetime.now() + timedelta(hours=2))
+                                her.strftime('%H:%M')
+                                rep = Reponse(utilisateur=Utilisateur(id_uti['id']), acteur=Acteur(id_act['id']), contenu_mes=msg, date_mes=dat, heure_mes=her)
+                                rep.save()
+                                messages.info(request,"Message envoyé à l'acteur!")
                                 return render (request, "envoyer_sms.html",locals())
                             else:
                                 groupes = Groupe.objects.all().order_by("nom_groupe")
                                 messages.info(request,"Echec,numero inconu ou bien l'acteur est bloqué !")
                                 type_msg = "error"
                                 return render (request, "envoyer_sms.html",locals()) 
-                            #envoyer a un acteur
+
                 else:
                     if len(grp) == 0:
                         groupes = Groupe.objects.all().order_by("nom_groupe")
@@ -115,8 +136,22 @@ def envoyer_sms(request):
                                 username_util = request.user.username
                                 id_uti = Utilisateur.objects.values('id').get(user__username=username_util)
                                 #----select tous les membres(id,number)
-                                list_member = Acteur_groupe.objects.values('acteur','acteur__telephone_act').filter(groupe=grp)
-                                #----send SMS------
+                                list_members = Acteur_groupe.objects.values('acteur','acteur__telephone_act').filter(groupe=grp)
+                                for membre in list_members:
+                                    id_acte = membre['acteur']
+                                    nume = membre['acteur__telephone_act']
+                                     #----send SMS------
+                                    msg = urllib.parse.quote(msg)
+                                    source_num = "+25779612730".replace("+","")
+                                    nume.replace("+","")
+                                    url = "http://localhost:13013/cgi-bin/sendsms?username=humura&password=CHANGE-ME&from="+source_num+"&to="+nume+"&text="+msg+""
+                                    urllib.request.urlopen(url)
+                                    msg = msg.replace("%20"," ")
+                                    dat = datetime.today()
+                                    her = (datetime.now() + timedelta(hours=2))
+                                    her.strftime('%H:%M')
+                                    rep = Reponse(utilisateur=Utilisateur(id_uti['id']), acteur=Acteur(id_acte), contenu_mes=msg, date_mes=dat, heure_mes=her)
+                                    rep.save()
 
                                 messages.info(request,"Message envoyé à tous les membres du groupe!")
                                 return render (request, "envoyer_sms.html",locals())
@@ -124,12 +159,100 @@ def envoyer_sms(request):
                                 groupes = Groupe.objects.all().order_by("nom_groupe")
                                 messages.info(request,"Echec,le groupe n'a pas des membres ou bien ils sont bloqués !")
                                 type_msg = "error"
-                                return render (request, "envoyer_sms.html",{'type_msg':type_msg})
+                                return render (request, "envoyer_sms.html",locals())
         else:
             groupes = Groupe.objects.all().order_by("nom_groupe")
             messages.info(request,"Selectionnez le type du destinateur svp !")
             type_msg = "error"
-            return render (request, "envoyer_sms.html",{'type_msg':type_msg})
+            return render (request, "envoyer_sms.html",locals())
+
+
+#report_sms
+def afficher_sms_recu(request):
+    if request.method == "GET":
+        num_sms_recu = request.GET.get('id')
+        sms_recu = request.GET.get('text')
+        if num_sms_recu and sms_recu:
+            if not bool(re.search('[a-zA-Z]', num_sms_recu)):
+                if "+257" in num_sms_recu:
+                    num_sms_recu = num_sms_recu.replace("+257","")
+                if Acteur.objects.filter(telephone_act=num_sms_recu, etat_act="non bloquer").exists():
+                    id_act = Acteur.objects.values("id").get(telephone_act=num_sms_recu)
+                    dat = datetime.today()
+                    her = (datetime.now() + timedelta(hours=2))
+                    her.strftime('%H:%M')
+                    report = Reports(acteur=Acteur(id_act['id']), contenu_mes=sms_recu, date_mes=dat, heure_mes=her)
+                    report.save()
+                    #----------SMS acc de reception----------
+                    msg_acc = "Murakoze ubutumwa bwanyu burashitse kuri centre humura"
+                    msg_acc = urllib.parse.quote(msg_acc)
+                    source_num = "+25779612730".replace("+","")
+                    url = "http://localhost:13013/cgi-bin/sendsms?username=humura&password=CHANGE-ME&from="+source_num+"&to="+num_sms_recu+"&text="+msg_acc+""
+                    urllib.request.urlopen(url)
+                    #----------notifier les utilisateur----------
+                    list_utilisateurs = Utilisateur.objects.values('user__username').filter(user__is_active=True)
+                    try:
+                        colline = Colline.objects.values("nom_col").get(acteur__telephone_act=num_sms_recu)
+                    except Colline.DoesNotExist:
+                        colline = None
+                    for utilisateur in list_utilisateurs:
+                        msg_notification = "Ubutumwa buvuye kumutumba "+colline['nom_col']+" burungitswe na "+num_sms_recu+" : "+sms_recu
+                        msg_notification = urllib.parse.quote(msg_notification)
+                        source_num = "+25779612730".replace("+","")
+                        num_utilisteur = utilisateur['user__username']
+                        url = "http://localhost:13013/cgi-bin/sendsms?username=humura&password=CHANGE-ME&from="+source_num+"&to="+num_utilisteur+"&text="+msg_notification+""
+                        urllib.request.urlopen(url)
+                    try:
+                        user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+                    except Utilisateur.DoesNotExist:
+                        user = None
+                    reports = Reports.objects.values("id","contenu_mes","date_mes","heure_mes","categories__nom_cat","acteur__prenom_act","acteur__telephone_act").order_by("-date_mes","-heure_mes")
+                    return render(request, "afficher_sms_recu.html", {'reports':reports,'user':user})
+        else:
+            try:
+                user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+            except Utilisateur.DoesNotExist:
+                user = None
+            reports = Reports.objects.values("id","contenu_mes","date_mes","heure_mes","categories__nom_cat","acteur__prenom_act","acteur__telephone_act").order_by("-date_mes","-heure_mes")
+            return render(request, "afficher_sms_recu.html", {'reports':reports,'user':user})
+
+
+def supprimer_sms_recu(request, id_msg):
+    Reports.objects.get(pk = id_msg).delete()
+    messages.info(request,"La suppresion est reussie avec succes !")
+    return redirect("rpt_url")
+
+def categorise_sms_recu(request, id_msg):
+    rap = Reports.objects.values("id").get(pk=id_msg)
+    categories = Categorie.objects.values("id","nom_cat")
+    return render(request, "categorise_sms.html", locals())
+
+def update_cat_sms_recu(request, id_msg):
+    cat = request.POST.get('select_cat')
+    if len(cat) == 0:
+        messages.info(request,"Attention, vous n'avez pas categorise le message fait-le svp !!")
+        return redirect("rpt_url")
+    else:
+        rep = Reports.objects.get(pk = id_msg)
+        rep.categories = Categorie(cat)
+        rep.save()
+        messages.info(request,"Le message est categorisé avec succes !")
+        return redirect("rpt_url")
+
+def repondre_sms_recu(request, id_msg):
+    report = Reports.objects.values("acteur__telephone_act").get(pk = id_msg)
+    return render(request,"repondre_sms.html",{'report':report})
+
+def transferer_sms_recu(request, id_msg):
+    report = Reports.objects.values("contenu_mes").get(pk = id_msg)
+    return render(request,"transferer_sms.html",{'report':report})
+
+#visualisation
+def get_visauliser_page(request):
+    return render(request, "visualisation.html", locals())
+
+def visualiser_data(request):
+    pass
 
 # provinces
 def afficher_province(request):
@@ -142,7 +265,7 @@ def afficher_province(request):
 
 def ajouter_province(request):
     if request.method == "POST":
-        nom = request.POST.get("nom_prov")
+        nom = request.POST.get("nom_prov").strip()
         if len(nom) == 0:
             messages.info(request,"Saisissez le nom du province svp !")
             type_msg = "error"
@@ -155,9 +278,13 @@ def ajouter_province(request):
             return redirect("pro_url")
 
 def supprimer_province(request, id_p): 
-    Province.objects.get(pk = id_p).delete()
-    messages.info(request,"La suppresion est reussie avec succes !")
-    return redirect("pro_url")
+    try:
+        Province.objects.get(pk = id_p).delete()
+        messages.info(request,"La suppresion est reussie avec succes !")
+        return redirect("pro_url")
+    except ProtectedError:
+        messages.info(request,"Impossible de supprimer il y'a des donnees liées à cette information que vous risquez de perdre !")
+        return redirect("pro_url")
 
 def editer_province(request, id_p):
     provinces = Province.objects.get(pk = id_p)
@@ -165,7 +292,7 @@ def editer_province(request, id_p):
 
 def update_province(request, id_p):
     if request.method == "POST":
-        nom = request.POST.get("nom_prov")
+        nom = request.POST.get("nom_prov").strip()
         if len(nom) == 0:
             messages.info(request,"Attention, vous n'avez pas mis la nouvelle valeur !!")
             return redirect("pro_url")
@@ -189,7 +316,7 @@ def afficher_commune(request):
 def ajouter_commune(request):
     if request.method == "POST":
         pro = request.POST.get("select_pro")
-        com = request.POST.get("nom_com")
+        com = request.POST.get("nom_com").strip()
         if len(pro) == 0:
             provinces = Province.objects.all().order_by("nom_pro")
             communes = Commune.objects.values('id','province__nom_pro','nom_com').order_by("id")
@@ -208,10 +335,14 @@ def ajouter_commune(request):
             messages.info(request, "Enregistrement reussi avec succes !")
             return redirect("cm_url")
 
-def supprimer_commune(request, id_cm): 
-    Commune.objects.get(pk = id_cm).delete()
-    messages.info(request,"La suppresion est reussie avec succes !")
-    return redirect("cm_url")
+def supprimer_commune(request, id_cm):
+    try: 
+        Commune.objects.get(pk = id_cm).delete()
+        messages.info(request,"La suppresion est reussie avec succes !")
+        return redirect("cm_url")
+    except ProtectedError:
+        messages.info(request,"Impossible de supprimer il y'a des données liées à cette information que vous risquez de perdre !")
+        return redirect("cm_url")
 
 def editer_commune(request, id_cm):
     communes = Commune.objects.get(pk = id_cm)
@@ -225,7 +356,7 @@ def editer_commune(request, id_cm):
 def update_commune(request, id_cm):
     if request.method == "POST":
         pro = request.POST.get("select_pro")
-        com = request.POST.get("nom_com")
+        com = request.POST.get("nom_com").strip()
         if len(pro) == 0:
             messages.info(request,"Attention, vous n'avez pas mis la nouvelle valeur !!")
             return redirect("cm_url")
@@ -235,27 +366,11 @@ def update_commune(request, id_cm):
         else:
             c = Commune.objects.get(pk = id_cm)
             c.province = Province(pro)
-            print("-------",Province(pro))
             c.nom_com = com
             c.save()
             messages.info(request,"La modification est reussie avec succes !")
             return redirect("cm_url")
 
-'''def chercher_commune(request):
-    if request.method == 'GET':
-        nom = request.GET.get('cherch_com').strip()
-        if len(nom) == 0:
-            messages.info(request, "Saisissez le nom de la commune à chercher svp !")
-            return redirect('cm_url')
-        else:
-            liste = Commune.objects.values('id','province__nom_pro','nom_com').filter(nom_com=nom)
-            nbr = liste.count()
-            if nbr == 0:
-                type_msg = "error"
-                messages.info(request, "La commune n'existe pas dans le system ou verifier l'orthographe svp !")
-                return redirect('cm_url')
-            else:
-                return render(request, "commune.html",{'communes':liste})'''
 
 #colline
 def afficher_colline(request):
@@ -271,7 +386,7 @@ def afficher_colline(request):
 def ajouter_colline(request):
     if request.method == "POST":
         com = request.POST.get("select_com")
-        col = request.POST.get("nom_col")
+        col = request.POST.get("nom_col").strip()
         act = request.POST.get("select_act")
 
         if len(act) == 0:
@@ -302,10 +417,14 @@ def ajouter_colline(request):
             messages.info(request, ""+acteur_nom['nom_act']+" est maintenant le responsable de la colline "+col+"!")
             return redirect("col_url")
 
-def supprimer_colline(request, id_co): 
-    Colline.objects.get(pk = id_co).delete()
-    messages.info(request,"La suppresion est reussie avec succes !")
-    return redirect("col_url")
+def supprimer_colline(request, id_co):
+    try: 
+        Colline.objects.get(pk = id_co).delete()
+        messages.info(request,"La suppresion est reussie avec succes !")
+        return redirect("col_url")
+    except ProtectedError:
+        messages.info(request,"Impossible de supprimer il y'a des données liées à cette information que vous risquez de perdre !")
+        return redirect("col_url")
 
 def editer_colline(request, id_co):
     collines = Colline.objects.get(pk = id_co)
@@ -319,7 +438,7 @@ def editer_colline(request, id_co):
 def update_colline(request, id_co):
     if request.method == "POST":
         com = request.POST.get("select_com")
-        col = request.POST.get("nom_com")
+        col = request.POST.get("nom_com").strip()
         act = request.POST.get("select_act")
         if len(col) == 0:
             messages.info(request,"Attention, vous n'avez pas mis la nouvelle valeur !!")
@@ -339,21 +458,6 @@ def update_colline(request, id_co):
             messages.info(request,"La modification est reussie avec succes !")
             return redirect("col_url")
 
-'''def chercher_colline(request):
-    if request.method == 'GET':
-        nom = request.GET.get('cherch_col').strip()
-        if len(nom) == 0:
-            messagess.info(request, "Saisissez le nom de la colline à chercher svp !")
-            return redirect('col_url')
-        else:
-            liste = Colline.objects.values('id','commune__nom_com','nom_col','acteur__nom_act','acteur__prenom_act','acteur__telephone_act').filter(nom_col=nom)
-            nbr = liste.count()
-            if nbr == 0:
-                type_msg = "error"
-                messagess.info(request, "La colline n'existe pas dans le system ou verifier l'orthographe svp !")
-                return redirect('col_url')
-            else:
-                return render(request, "colline.html",{'collines':liste})'''
 
 
 # categorie
@@ -367,7 +471,7 @@ def afficher_categorie(request):
 
 def ajouter_categorie(request):
     if request.method == "POST":
-        nom = request.POST.get("nom_cat")
+        nom = request.POST.get("nom_cat").strip()
         if len(nom) == 0:
             categories = Categorie.objects.all().order_by("id")
             messages.info(request,"Saisissez le nom du categorie svp !")
@@ -380,17 +484,31 @@ def ajouter_categorie(request):
             return redirect("cat_url")
 
 def supprimer_categorie(request, id_cat): 
-    Categorie.objects.get(pk = id_cat).delete()
-    messages.info(request,"La suppresion est reussie avec succes !")
-    return redirect("cat_url")
+    if id_cat == 1:
+        categories = Categorie.objects.all().order_by("id")
+        messages.info(request,"C'est la categorie par defaut il ne faut pas la supprimer svp !")
+        return redirect("cat_url")
+    else:
+        try:
+            Categorie.objects.get(pk = id_cat).delete()
+            messages.info(request,"La suppresion est reussie avec succes !")
+            return redirect("cat_url")
+        except ProtectedError:
+            messages.info(request,"Impossible de supprimer il y'a des données liées à cette information que vous risquez de perdre !")
+            return redirect("cat_url")
 
 def editer_categorie(request, id_cat):
-    categorie = Categorie.objects.get(pk = id_cat)
-    return render(request,"categorie_edit.html",{'categories':categorie})
+    if id_cat == 1:
+        categories = Categorie.objects.all().order_by("id")
+        messages.info(request,"C'est la categorie par defaut il ne faut pas la modifiée svp !")
+        return redirect("cat_url")
+    else:
+        categorie = Categorie.objects.get(pk = id_cat)
+        return render(request,"categorie_edit.html",{'categories':categorie})
 
 def update_categorie(request, id_cat):
     if request.method == "POST":
-        nom = request.POST.get("nom_cat")
+        nom = request.POST.get("nom_cat").strip()
         if len(nom) == 0:
             messages.info(request,"Attention, vous n'avez pas mis la nouvelle valeur !!")
             return redirect("cat_url")
@@ -413,7 +531,7 @@ def afficher_groupe(request):
 
 def ajouter_groupe(request):
     if request.method == "POST":
-        nom = request.POST.get("nom_grp")
+        nom = request.POST.get("nom_grp").strip()
         if len(nom) == 0:
             groupe = Groupe.objects.all().order_by("id")
             messages.info(request,"Saisissez le nom du groupe svp !")
@@ -426,9 +544,13 @@ def ajouter_groupe(request):
             return redirect("grp_url")
 
 def supprimer_groupe(request, id_g): 
-    Groupe.objects.get(pk = id_g).delete()
-    messages.info(request,"La suppresion est reussie avec succes !")
-    return redirect("grp_url")
+    try:
+        Groupe.objects.get(pk = id_g).delete()
+        messages.info(request,"La suppresion est reussie avec succes !")
+        return redirect("grp_url")
+    except ProtectedError:
+        messages.info(request,"Impossible de supprimer il y'a des données liées à cette information que vous risquez de perdre !")
+        return redirect("grp_url")
 
 def editer_groupe(request, id_g):
     groupes = Groupe.objects.get(pk = id_g)
@@ -436,7 +558,7 @@ def editer_groupe(request, id_g):
 
 def update_groupe(request, id_g):
     if request.method == "POST":
-        nom = request.POST.get("nom_grp")
+        nom = request.POST.get("nom_grp").strip()
         if len(nom) == 0:
             messages.info(request,"Attention, vous n'avez pas mis la nouvelle valeur !!")
             return redirect("grp_url")
@@ -452,17 +574,17 @@ def update_groupe(request, id_g):
 def afficher_acteur(request):
     try:
         user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
-        acteurs = Acteur.objects.all().order_by("id")
+        acteurs = Acteur.objects.all().order_by("nom_act")
         return render(request,"acteur.html",locals())
     except ObjectDoesNotExist:
         return redirect("auth_url")
 
 def ajouter_acteur(request):
     if request.method == "POST":
-        nom = request.POST.get("nom_act")
-        prenom = request.POST.get("prenom_act")
-        identite = request.POST.get("num_id")
-        tel = request.POST.get("num_tel")
+        nom = request.POST.get("nom_act").strip()
+        prenom = request.POST.get("prenom_act").strip()
+        identite = request.POST.get("num_id").strip()
+        tel = request.POST.get("num_tel").strip()
         etat = request.POST.get("etat_act")
         if len(nom) == 0:
             acteurs = Acteur.objects.all().order_by("id")
@@ -492,9 +614,13 @@ def ajouter_acteur(request):
                 return redirect("act_url")
 
 def supprimer_acteur(request, id_act): 
-    Acteur.objects.get(pk = id_act).delete()
-    messages.info(request,"La suppresion est reussie avec succes !")
-    return redirect("act_url")
+    try:
+        Acteur.objects.get(pk = id_act).delete()
+        messages.info(request,"La suppresion est reussie avec succes !")
+        return redirect("act_url")
+    except ProtectedError:
+        messages.info(request,"Impossible de supprimer il y'a des données liées à cette information que vous risquez de perdre !")
+        return redirect("act_url")
 
 def editer_acteur(request, id_act):
     acteur = Acteur.objects.get(pk = id_act)
@@ -503,10 +629,10 @@ def editer_acteur(request, id_act):
 
 def update_acteur(request, id_act):
     if request.method == "POST":
-        nom = request.POST.get("nom_act")
-        prenom = request.POST.get("prenom_act")
-        identite = request.POST.get("num_id")
-        tel = request.POST.get("num_tel")
+        nom = request.POST.get("nom_act").strip()
+        prenom = request.POST.get("prenom_act").strip()
+        identite = request.POST.get("num_id").strip()
+        tel = request.POST.get("num_tel").strip()
         etat = request.POST.get("etat_act")
         if len(nom) == 0:
             messages.info(request,"Attention, vous n'avez pas mis la nouvelle valeur !!")
@@ -528,23 +654,6 @@ def update_acteur(request, id_act):
             messages.info(request,"La modification est reussie avec succes !")
             return redirect("act_url")
 
-'''def chercher_acteur(request):
-    if request.method == 'GET':
-        numero = request.GET.get('cherch_act').strip()
-        if len(numero) == 0:
-            acteurs = Acteur.objects.all().order_by("id")
-            messages.info(request, "Saisissez le numero de l'acteur communauteur à chercher svp !")
-            type_msg = "error"
-            return render(request,"acteur.html",{'type_msg':type_msg,'acteurs':acteurs})
-        else:
-            liste = Acteur.objects.values('id','nom_act','prenom_act','num_ide_act','telephone_act','etat_act').filter(telephone_act=numero)
-            nbr = liste.count()
-            if nbr == 0:
-                type_msg = "error"
-                messages.info(request, "L'acteur n'existe pas dans le system ou bien verifier les numero !")
-                return redirect('act_url')
-            else:
-                return render(request, "acteur.html",{'acteurs':liste})'''
 
 
 #acteur_groupe
@@ -589,51 +698,6 @@ def ajouter_acteur_groupe(request):
                 messages.info(request, "Enregistrement reussi avec succes !")
                 return redirect("actgrp_url")
 
-'''def chercher_acteur_groupe_num(request):
-    if request.method == 'GET':
-        num = request.GET.get('cherch_actgrp').strip()
-        num.trim()
-        if len(num) == 0:
-            acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').order_by("nom_act")
-            groupes = Groupe.objects.all().order_by("id")
-            acteur_groupe = Acteur_groupe.objects.values('id','acteur__nom_act','acteur__prenom_act','acteur__telephone_act','groupe__nom_groupe','etat_act_group').order_by("id")
-            messages.info(request, "Saisissez le numero de l'acteur communauteur à chercher svp !")
-            type_msg = "error"
-            return render(request,"acteur_groupe.html",locals())
-        else:
-            liste = Acteur_groupe.objects.values('id','acteur__nom_act','acteur__prenom_act','acteur__telephone_act','groupe__nom_groupe','etat_act_group').filter(acteur__telephone_act=num)
-            nbr = liste.count()
-            if nbr == 0:
-                acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').order_by("nom_act")
-                groupes = Groupe.objects.all().order_by("id")
-                acteur_groupe = Acteur_groupe.objects.values('id','acteur__nom_act','acteur__prenom_cat','acteur__telephone_act','groupe__nom_groupe','etat_act_group').order_by("id")
-                type_msg = "error"
-                messages.info(request, "L'acteur appartient à aucun groupe !")
-                return render(request,"acteur_groupe.html",locals())
-            else:
-                return render(request, "acteur_groupe.html",{'acteur_groupe':liste})'''
-
-
-'''def chercher_acteur_groupe_grp(request):
-    if request.method == 'GET':
-        grp = request.GET.get('cherch_grpact').strip()
-        if len(grp) == 0:
-            messages.info(request, "Saisissez le nom du groupe à chercher svp !")
-            acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').order_by("nom_act")
-            groupes = Groupe.objects.all().order_by("id")
-            acteur_groupe = Acteur_groupe.objects.values('id','acteur__nom_act','acteur__prenom_act','acteur__telephone_act','groupe__nom_groupe','etat_act_group').order_by("id")
-            type_msg = "error"
-            return render(request,"acteur_groupe.html",locals())
-        else:
-            liste = Acteur_groupe.objects.values('id','acteur__nom_act','acteur__prenom_act','acteur__telephone_act','groupe__nom_groupe','etat_act_group').filter(groupe__nom_groupe=grp)
-            nbr = liste.count()
-            if nbr == 0:
-                type_msg = "error"
-                messages.info(request, "Le groupe a aucun acteur !")
-                return redirect('act_actgrp_url')
-            else:
-                return render(request, "acteur_groupe.html",{'acteur_groupe':liste})'''
-
 
 def editer_acteur_groupe(request, id_actgrp):
     acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').filter(etat_act='non bloquer').order_by("nom_act")
@@ -670,18 +734,18 @@ def update_acteur_groupe(request, id_actgrp):
 def afficher_utilisateur(request):
     try:
         user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
-        utilisateurs = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'num_id_uti','user__username', 'profil', 'user__is_active').order_by("id")
+        utilisateurs = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'num_id_uti','user__username', 'profil', 'user__is_active').order_by("nom_uti")
         return render(request,"utilisateur.html",locals())
     except ObjectDoesNotExist:
         return redirect("auth_url")
 
 def ajouter_utilisateur(request):
     if request.method == "POST":
-        nom = request.POST.get('txt_nom')
-        prenom = request.POST.get('txt_prenom')
-        identifiant = request.POST.get('txt_num_id')
-        telephone = request.POST.get('txt_tel')
-        password = request.POST.get('txt_pass')
+        nom = request.POST.get('txt_nom').strip()
+        prenom = request.POST.get('txt_prenom').strip()
+        identifiant = request.POST.get('txt_num_id').strip()
+        telephone = request.POST.get('txt_tel').strip()
+        password = request.POST.get('txt_pass').strip()
         etat = request.POST.get('txt_etat')
         profil = request.POST.get('txt_profil')
         if len(nom) == 0 or len(prenom) == 0 or len(telephone) == 0 or len(password) == 0 or len(etat) == 0 or len(profil) == 0:
@@ -717,23 +781,27 @@ def ajouter_utilisateur(request):
                 
 
 def supprimer_utilisateur(request, id_util): 
+    try:
         utilisateur = Utilisateur.objects.get(pk=id_util)
         users = utilisateur.user
         utilisateur.delete()
         users.delete()
         messages.info(request, "La suppression est reussie avec succes !")
         return redirect("util_url")
-
+    except ProtectedError:
+        messages.info(request,"Impossible de supprimer il y'a des données liées à cette information que vous risquez de perdre !")
+        return redirect("util_url")
+        
 def editer_utilisateur(request, id_util):
     utilisateurs = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'user__username','num_id_uti', 'user__is_active', 'profil').get(pk=id_util)
     return render(request, "utilisateur_edit.html", {'utilisateurs':utilisateurs})
 
 def update_utilisateur(request, id_util):
     if request.method == "POST":
-        nom = request.POST.get('txt_nom')
-        prenom = request.POST.get('txt_prenom')
-        identifiant = request.POST.get('txt_num_id')
-        telephone = request.POST.get('txt_tel')
+        nom = request.POST.get('txt_nom').strip()
+        prenom = request.POST.get('txt_prenom').strip()
+        identifiant = request.POST.get('txt_num_id').strip()
+        telephone = request.POST.get('txt_tel').strip()
         etat = request.POST.get('txt_etat')
         profil = request.POST.get('txt_profil')
         if len(nom) == 0 or len(prenom) == 0 or len(telephone) == 0 or len(etat) == 0 or len(profil) == 0:
@@ -742,7 +810,6 @@ def update_utilisateur(request, id_util):
         else:
             
             uti = Utilisateur.objects.get(pk = id_util)
-            print(telephone,"----",etat)
             uti.nom_uti = nom
             uti.prenom_uti = prenom
             uti.num_id_uti = identifiant
@@ -755,22 +822,6 @@ def update_utilisateur(request, id_util):
             messages.info(request, "La modification est reussie avec succes !")
             return redirect("util_url")
 
-'''def chercher_utilisateur(request):
-    if request.method == 'GET':
-        numero = request.GET.get('cherch_util').strip()
-        if len(numero) == 0:
-            messages.info(request, "Saisissez le numero de l'utilisateur à chercher svp !")
-            return redirect('util_url')
-        else:
-            liste = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'num_id_uti','user__username', 'profil', 'user__is_active').filter(user__username=numero)
-            nbr = liste.count()
-            if nbr == 0:
-                utilisateurs = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'num_id_uti','user__username', 'profil', 'user__is_active').order_by("id")
-                type_msg = "error"
-                messages.info(request, "L'utilisateur n'existe pas dans le system ou bien verifier le numero !")
-                return render(request,"utilisateur.html",{'utilisateurs':utilisateurs,'type_msg':type_msg})
-            else:
-                return render(request, "utilisateur.html",{'utilisateurs':liste})'''
 
 #change_pwd
 def afficher_change_pwd(request):
@@ -779,10 +830,10 @@ def afficher_change_pwd(request):
 
 def change_pwd(request):
     if request.method == 'POST':
-        num = request.POST.get('txt_num')
-        anc_pass = request.POST.get('txt_pswd_anc')
-        nouv_pass = request.POST.get('txt_pswd')
-        confirm = request.POST.get('txt_pswd_anc_conf')
+        num = request.POST.get('txt_num').strip()
+        anc_pass = request.POST.get('txt_pswd_anc').strip()
+        nouv_pass = request.POST.get('txt_pswd').strip()
+        confirm = request.POST.get('txt_pswd_anc_conf').strip()
         if len(num) == 0 or len(anc_pass) == 0 or len(nouv_pass) == 0 or len(confirm) == 0:
             type_msg = "error"
             messages.info(request, "Completez tous les informations svp !")
@@ -806,4 +857,3 @@ def change_pwd(request):
                     return render(request,"change_password.html",{'type_msg':type_msg})
 
 
-                
