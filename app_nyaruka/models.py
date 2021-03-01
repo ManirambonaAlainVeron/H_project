@@ -57,6 +57,7 @@ class Reports(models.Model):
     contenu_mes = models.TextField()
     date_mes = models.DateField(auto_now_add=True)
     heure_mes = models.TimeField(auto_now_add=True)
+    colline = models.ForeignKey(Colline,on_delete=models.PROTECT)
     categories = models.ForeignKey(Categorie, on_delete=models.PROTECT, default=1)
 
     class Meta:

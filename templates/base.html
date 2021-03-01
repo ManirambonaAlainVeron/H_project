@@ -14,39 +14,81 @@
 
     <div class="container-fluid">
         {% block menu %}
-        <nav class="navbar navbar-expand-md navbar-dark" style="background-color: #00BCD4;color:white;margin-left: 0;">
-            <a class="navbar-brand" href="#">Humura</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-              <span class="navbar-toggler-icon"></span>
-            </button>
-          
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                  <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="#" style="color: white;">Link </a>
-                </li>
-                <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Dropdown
-                  </a>
-                  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="#">Action</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">Something else here</a>
-                  </div>
-                </li>
-              </ul>
-              <div style="margin-right: 10px; color:white" >{{user.nom_uti}} {{user.prenom_uti}}</div>
-              <form class="form-inline my-2 my-lg-0" action="deconnect" method="POST">
-                  {% csrf_token %}
-                <button class="btn btn-warning my-2 my-sm-0" type="submit">Se deconnecter</button>
-              </form>
-            </div>
-          </nav>
+        {% if  profil  %}
+            <nav class="navbar navbar-expand-md navbar-dark" style="background-color: #00BCD4;color:white;margin-left: 0;">
+             
+            
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                  <li class="nav-item ml-5">
+                    <a class="nav-link" href="{% url 'env_url' %}" style="color: white;">Envoyer SMS </a>
+                  </li>
+                  <li class="nav-item ml-4">
+                    <a class="nav-link" href="{% url 'rpt_url' %}" style="color: white;">SMS reçu </a>
+                  </li>
+                  <li class="nav-item ml-4">
+                    <a class="nav-link" href="{% url 'vs_url' %}" style="color: white;">Visualisation </a>
+                  </li>
+                </ul>
+                <div style="margin-right: 10px; color:white" >{{user.nom_uti}} {{user.prenom_uti}}</div>
+                <form class="form-inline my-2 my-lg-0" action="deconnect" method="POST">
+                    {% csrf_token %}
+                  <button class="btn btn-warning my-2 my-sm-0" type="submit">Se deconnecter</button>
+                </form>
+              </div>
+            </nav>
+        {% else %}
+            <nav class="navbar navbar-expand-md navbar-dark" style="background-color: #00BCD4;color:white;margin-left: 0;">
+            
+            
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                  <li class="nav-item ml-5">
+                    <a class="nav-link" href="{% url 'util_url' %}" style="color: white;">Utilisateur </a>
+                  </li>
+                  <li class="nav-item ml-4">
+                    <a class="nav-link" href="{% url 'act_url' %}" style="color: white;">Acteur </a>
+                  </li>
+                  <li class="nav-item dropdown ml-4">
+                    <a class="nav-link dropdown-toggle" href="#" style="color: white;" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Ajouter
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                      <a class="dropdown-item" href="{% url 'pro_url' %}">Province</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="{% url 'cm_url' %}">Commune</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="{% url 'col_url' %}">Colline</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="{% url 'cat_url' %}">Categorie</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="{% url 'grp_url' %}">Groupe</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="{% url 'actgrp_url' %}">Acteur->Groupe</a>
+                      
+                    
+                    </div>
+                  </li>
+                  <li class="nav-item ml-4">
+                    <a class="nav-link" href="{% url 'env_url' %}" style="color: white;">Envoyer SMS </a>
+                  </li>
+                  <li class="nav-item ml-4">
+                    <a class="nav-link" href="{% url 'rpt_url' %}" style="color: white;">SMS reçu </a>
+                  </li>
+                  <li class="nav-item ml-4">
+                    <a class="nav-link" href="{% url 'vs_url' %}" style="color: white;">Visualisation </a>
+                  </li>
+                
+                </ul>
+                <div style="margin-right: 10px; color:white" >{{user.nom_uti}} {{user.prenom_uti}}</div>
+                <form class="form-inline my-2 my-lg-0" action="deconnect" method="POST">
+                    {% csrf_token %}
+                  <button class="btn btn-warning my-2 my-sm-0" type="submit">Se deconnecter</button>
+                </form>
+              </div>
+            </nav>
+        {% endif %}
+
         {% endblock menu %}
         
         {% block content %}
@@ -60,7 +102,7 @@
         <script src="{% static 'js/popper.min.js' %}"></script>
         <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
         <script src="{% static 'js/dataTables.bootstrap4.min.js' %}"></script>
-
+        <script src="{% static 'js/Chart.min.js' %}"></script>
         <script type="text/javascript">
             function preventBack() { window.history.forward();
             }  
@@ -95,8 +137,15 @@
                   "ordering": false
                 });
                 $('.dataTables_length').addClass('bs-select');
+
+                
               });
+
+              
         </script>
+        {% block js %}
+            
+        {% endblock js %}
         
 </body>
 </html>

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import request
+from django.http import request, JsonResponse
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -13,7 +13,8 @@ from urllib.request import urlopen
 from datetime import datetime,timedelta
 from time import strftime
 import re
-from django.db.models import ProtectedError
+from django.db.models import ProtectedError, Count, Q
+from json import dumps 
 
 
 # Create your views here.
@@ -38,10 +39,10 @@ def connexion_utilisateur(request):
                     return render(request,"Authentification.html",{'type_msg':type_msg})
                 if profil['profil'] == "admin":
                     login(request, user)
-                    return redirect("act_url")
+                    return redirect('util_url')
                 else:
                     login(request, user)
-                    return redirect("env_url")
+                    return redirect('env_url')
             else:
                 type_msg = "error"
                 messages.info(request, "Echec de connexion, le numero ou le mot de passe est incorrecte ou tu es desactivé !")
@@ -57,12 +58,16 @@ def deconnexion_utilisateur(request):
             
 #env_sms
 def afficher_envoyer_sms(request):
-    user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+    user = Utilisateur.objects.values('nom_uti','prenom_uti','profil').get(user__username=request.user.username)
+    if user['profil'] == "simple":
+        profil = True #pour differencie menu de admin et simple
     groupes = Groupe.objects.all().order_by("nom_groupe")
     return render (request, "envoyer_sms.html",locals())
 
 def afficher_sms_envoye(request):
-    user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+    user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
+    if user['profil'] == "simple":
+        profil = True #pour differencie menu de admin et simple
     sms_envoyes = Reponse.objects.values('id','contenu_mes','date_mes','heure_mes','acteur__telephone_act','utilisateur__prenom_uti','acteur__prenom_act').order_by("-date_mes","-heure_mes")
     return render(request, "afficher_sms_envoyer.html", locals())
 
@@ -178,10 +183,11 @@ def afficher_sms_recu(request):
                     num_sms_recu = num_sms_recu.replace("+257","")
                 if Acteur.objects.filter(telephone_act=num_sms_recu, etat_act="non bloquer").exists():
                     id_act = Acteur.objects.values("id").get(telephone_act=num_sms_recu)
+                    id_col = Colline.objects.values("id").get(acteur=id_act)
                     dat = datetime.today()
                     her = (datetime.now() + timedelta(hours=2))
                     her.strftime('%H:%M')
-                    report = Reports(acteur=Acteur(id_act['id']), contenu_mes=sms_recu, date_mes=dat, heure_mes=her)
+                    report = Reports(acteur=Acteur(id_act['id']), contenu_mes=sms_recu, date_mes=dat, heure_mes=her, colline=Colline(id_col['id']))
                     report.save()
                     #----------SMS acc de reception----------
                     msg_acc = "Murakoze ubutumwa bwanyu burashitse kuri centre humura"
@@ -203,18 +209,22 @@ def afficher_sms_recu(request):
                         url = "http://localhost:13013/cgi-bin/sendsms?username=humura&password=CHANGE-ME&from="+source_num+"&to="+num_utilisteur+"&text="+msg_notification+""
                         urllib.request.urlopen(url)
                     try:
-                        user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+                        user = Utilisateur.objects.values('nom_uti','prenom_uti','profil').get(user__username=request.user.username)
+                        if user['profil'] == "simple":
+                            profil = True #pour differencie menu de admin et simple
                     except Utilisateur.DoesNotExist:
                         user = None
                     reports = Reports.objects.values("id","contenu_mes","date_mes","heure_mes","categories__nom_cat","acteur__prenom_act","acteur__telephone_act").order_by("-date_mes","-heure_mes")
-                    return render(request, "afficher_sms_recu.html", {'reports':reports,'user':user})
+                    return render(request, "afficher_sms_recu.html", locals())
         else:
             try:
-                user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+                user = Utilisateur.objects.values('nom_uti','prenom_uti','profil').get(user__username=request.user.username)
+                if user['profil'] == "simple":
+                    profil = True #pour differencie menu de admin et simple
             except Utilisateur.DoesNotExist:
                 user = None
             reports = Reports.objects.values("id","contenu_mes","date_mes","heure_mes","categories__nom_cat","acteur__prenom_act","acteur__telephone_act").order_by("-date_mes","-heure_mes")
-            return render(request, "afficher_sms_recu.html", {'reports':reports,'user':user})
+            return render(request, "afficher_sms_recu.html", locals())
 
 
 def supprimer_sms_recu(request, id_msg):
@@ -223,6 +233,9 @@ def supprimer_sms_recu(request, id_msg):
     return redirect("rpt_url")
 
 def categorise_sms_recu(request, id_msg):
+    user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
+    if user['profil'] == "simple":
+        profil = True #pour differencie menu de admin et simple
     rap = Reports.objects.values("id").get(pk=id_msg)
     categories = Categorie.objects.values("id","nom_cat")
     return render(request, "categorise_sms.html", locals())
@@ -240,19 +253,71 @@ def update_cat_sms_recu(request, id_msg):
         return redirect("rpt_url")
 
 def repondre_sms_recu(request, id_msg):
+    user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
+    if user['profil'] == "simple":
+        profil = True #pour differencie menu de admin et simple
     report = Reports.objects.values("acteur__telephone_act").get(pk = id_msg)
-    return render(request,"repondre_sms.html",{'report':report})
+    return render(request,"repondre_sms.html",locals())
 
 def transferer_sms_recu(request, id_msg):
+    user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
+    if user['profil'] == "simple":
+        profil = True #pour differencie menu de admin et simple
     report = Reports.objects.values("contenu_mes").get(pk = id_msg)
-    return render(request,"transferer_sms.html",{'report':report})
+    return render(request,"transferer_sms.html",locals())
 
 #visualisation
 def get_visauliser_page(request):
+    user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
+    if user['profil'] == "simple":
+        profil = True #pour differencie menu de admin et simple
     return render(request, "visualisation.html", locals())
 
 def visualiser_data(request):
-    pass
+    if request.method == 'POST':
+        generate_typ = request.POST.get("select_typ_vis")
+        date_debut = request.POST.get("dat_deb")
+        date_fin = request.POST.get("dat_fin")
+        if len(generate_typ) == 0 or len(date_debut) == 0 or len(date_fin) == 0:
+            messages.info(request,"Selectionnez svp le type, date de debut et date de fin !")
+            type_msg = "error"
+            return render(request, "visualisation.html", locals())
+        else:
+            if date_debut >= date_fin:
+                messages.info(request,"Attention date incorrecte.La date de debut doit être inferieure à la date de fin !")
+                type_msg = "error"
+                return render(request, "visualisation.html", locals())
+            else:
+                if generate_typ == "colline":
+                    nom_col = []
+                    nbr_cas = []
+                    queryset = Reports.objects.values('colline__nom_col').annotate(nbr_cas=Count('id')).filter(date_mes__gte=date_debut, date_mes__lte=date_fin)
+                    for element in queryset:
+                        nom_col.append(element['colline__nom_col'])
+                        nbr_cas.append(element['nbr_cas'])
+                    data = {'labels':nom_col, 'data':nbr_cas}
+                    dataJSON = dumps(data) 
+                    return render(request, "visualisation.html", {'data':dataJSON})
+                elif generate_typ == "commune":
+                    nom_com = []
+                    nbr_cas = []
+                    queryset = Reports.objects.values('colline__commune__nom_com').annotate(nbr_cas=Count('id')).filter(date_mes__gte=date_debut, date_mes__lte=date_fin)
+                    for element in queryset:
+                        nom_com.append(element['colline__commune__nom_com'])
+                        nbr_cas.append(element['nbr_cas'])
+                    data={'labels':nom_com, 'data':nbr_cas}
+                    dataJSON = dumps(data) 
+                    return render(request, "visualisation.html", {'data':dataJSON})
+                else :
+                    nom_cat = []
+                    nbr_cas = []
+                    queryset = Reports.objects.values('categories__nom_cat').annotate(nbr_cas=Count('id')).filter(date_mes__gte=date_debut, date_mes__lte=date_fin)
+                    for element in queryset:
+                        nom_cat.append(element['categories__nom_cat'])
+                        nbr_cas.append(element['nbr_cas'])
+                    data = {'labels':nom_cat, 'data':nbr_cas}
+                    dataJSON = dumps(data) 
+                    return render(request, "visualisation.html", {'data':dataJSON})
 
 # provinces
 def afficher_province(request):
@@ -283,7 +348,7 @@ def supprimer_province(request, id_p):
         messages.info(request,"La suppresion est reussie avec succes !")
         return redirect("pro_url")
     except ProtectedError:
-        messages.info(request,"Impossible de supprimer il y'a des donnees liées à cette information que vous risquez de perdre !")
+        messages.info(request,"Impossible de supprimer il y'a des données liées à cette information que vous risquez de perdre !")
         return redirect("pro_url")
 
 def editer_province(request, id_p):
@@ -411,11 +476,19 @@ def ajouter_colline(request):
             type_msg = "error"
             return render(request,"colline.html",locals())
         else:
-            co = Colline(acteur = Acteur(act),commune=Commune(com), nom_col = col)
-            co.save()
-            acteur_nom = Acteur.objects.values('nom_act').get(pk=act)
-            messages.info(request, ""+acteur_nom['nom_act']+" est maintenant le responsable de la colline "+col+"!")
-            return redirect("col_url")
+            if Colline.objects.filter(acteur=act).exists():
+                acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').filter(etat_act='non bloquer').order_by("nom_act")
+                communes = Commune.objects.all().order_by("id")
+                collines = Colline.objects.values('id','commune__nom_com','nom_col','acteur__nom_act','acteur__prenom_act','acteur__telephone_act').order_by("id")
+                messages.info(request,"Echec, l'acteur est responsable d'une autre colline !")
+                type_msg = "error"
+                return render(request,"colline.html",locals())
+            else:
+                co = Colline(acteur = Acteur(act),commune=Commune(com), nom_col = col)
+                co.save()
+                acteur_nom = Acteur.objects.values('nom_act').get(pk=act)
+                messages.info(request, ""+acteur_nom['nom_act']+" est maintenant le responsable de la colline "+col+"!")
+                return redirect("col_url")
 
 def supprimer_colline(request, id_co):
     try: 
@@ -450,13 +523,17 @@ def update_colline(request, id_co):
             messages.info(request,"Attention, vous n'avez pas mis la nouvelle valeur !!")
             return redirect("col_url")
         else:
-            co = Colline.objects.get(pk = id_co)
-            co.commune = Commune(com)
-            co.nom_col = col
-            co.acteur = Acteur(act)
-            co.save()
-            messages.info(request,"La modification est reussie avec succes !")
-            return redirect("col_url")
+            if Colline.objects.filter(acteur=act).exists():
+                messages.info(request,"Echec, l'acteur est responsable d'une autre colline !")
+                return redirect("col_url")
+            else:
+                co = Colline.objects.get(pk = id_co)
+                co.commune = Commune(com)
+                co.nom_col = col
+                co.acteur = Acteur(act)
+                co.save()
+                messages.info(request,"La modification est reussie avec succes !")
+                return redirect("col_url")
 
 
 
