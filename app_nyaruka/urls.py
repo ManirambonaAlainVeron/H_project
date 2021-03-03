@@ -76,7 +76,7 @@ urlpatterns = [
     #report
     path('rpt/', views.afficher_sms_recu, name='rpt_url'),
     path('delrpt/<int:id_msg>', views.supprimer_sms_recu, name='del_msg_recu_url'),
-    path('catrpt<int:id_msg>', views.categorise_sms_recu, name='catrpt_url'),
+    path('catrpt/<int:id_msg>', views.categorise_sms_recu, name='catrpt_url'),
     path('updcatrpt/<int:id_msg>', views.update_cat_sms_recu, name='up_catrpt_url'),
     path('reprpt/<int:id_msg>', views.repondre_sms_recu, name='reprpt_url'),
     path('trsfrpt/<int:id_msg>', views.transferer_sms_recu, name='trsfrpt_url'),

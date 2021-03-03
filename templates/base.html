@@ -31,10 +31,15 @@
                   </li>
                 </ul>
                 <div style="margin-right: 10px; color:white" >{{user.nom_uti}} {{user.prenom_uti}}</div>
-                <form class="form-inline my-2 my-lg-0" action="deconnect" method="POST">
+                
+                {% if show_logout_btn %}
+                  <form class="form-inline my-2 my-lg-0" action="{% url 'deconnect_url' %}" method="POST">
                     {% csrf_token %}
-                  <button class="btn btn-warning my-2 my-sm-0" type="submit">Se deconnecter</button>
-                </form>
+                    <button class="btn btn-warning my-2 my-sm-0" type="submit">Se deconnecter</button>
+                  </form>
+                {% endif %}
+                  
+                
               </div>
             </nav>
         {% else %}
@@ -81,10 +86,15 @@
                 
                 </ul>
                 <div style="margin-right: 10px; color:white" >{{user.nom_uti}} {{user.prenom_uti}}</div>
-                <form class="form-inline my-2 my-lg-0" action="deconnect" method="POST">
+                
+                {% if show_logout_btn %}
+                  <form class="form-inline my-2 my-lg-0" action="{% url 'deconnect_url' %}" method="POST">
                     {% csrf_token %}
-                  <button class="btn btn-warning my-2 my-sm-0" type="submit">Se deconnecter</button>
-                </form>
+                    <button class="btn btn-warning my-2 my-sm-0" type="submit">Se deconnecter</button>
+                  </form>
+                {% endif %}
+                  
+                
               </div>
             </nav>
         {% endif %}

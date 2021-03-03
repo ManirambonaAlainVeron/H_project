@@ -27,7 +27,7 @@ def connexion_utilisateur(request):
      if request.method == 'POST':
         username = request.POST.get('txt_login').strip()
         password = request.POST.get('txt_pass').strip()
-        if len(username) != 0 or len(password) != 0:
+        if len(username) != 0 and len(password) != 0:
             user = authenticate(username=username, password=password)
             if user:
                 try:
@@ -62,6 +62,7 @@ def afficher_envoyer_sms(request):
     if user['profil'] == "simple":
         profil = True #pour differencie menu de admin et simple
     groupes = Groupe.objects.all().order_by("nom_groupe")
+    show_logout_btn = True #afficher logout button
     return render (request, "envoyer_sms.html",locals())
 
 def afficher_sms_envoye(request):
@@ -69,6 +70,7 @@ def afficher_sms_envoye(request):
     if user['profil'] == "simple":
         profil = True #pour differencie menu de admin et simple
     sms_envoyes = Reponse.objects.values('id','contenu_mes','date_mes','heure_mes','acteur__telephone_act','utilisateur__prenom_uti','acteur__prenom_act').order_by("-date_mes","-heure_mes")
+    show_logout_btn = True #afficher logout button
     return render(request, "afficher_sms_envoyer.html", locals())
 
 def supprimer_sms_envoyer(request, id_msg):
@@ -97,7 +99,6 @@ def envoyer_sms(request):
                             type_msg = "error"
                             return render (request, "envoyer_sms.html",locals())
                         else:
-                            print(msg,"--------------",numero,"----",typ)
                             #envoyer a un acteur
                             if Acteur.objects.filter(telephone_act=numero, etat_act="non bloquer").exists():
                                 id_act = Acteur.objects.values('id').get(telephone_act=numero)
@@ -105,9 +106,9 @@ def envoyer_sms(request):
                                 id_uti = Utilisateur.objects.values('id').get(user__username=username_util)
                                 #----------send SMS----------
                                 msg = urllib.parse.quote(msg)
-                                source_num = "+25779612730".replace("+","")
+                                source_num = "+25761192268".replace("+","")
                                 numero.replace("+","")
-                                url = "http://localhost:13013/cgi-bin/sendsms?username=humura&password=CHANGE-ME&from="+source_num+"&to="+numero+"&text="+msg+""
+                                url = "http://localhost:13013/cgi-bin/sendsms?username=?&password=?&from="+source_num+"&to="+numero+"&text="+msg+""
                                 urllib.request.urlopen(url)
                                 msg = msg.replace("%20"," ")
                                 dat = datetime.today()
@@ -115,6 +116,7 @@ def envoyer_sms(request):
                                 her.strftime('%H:%M')
                                 rep = Reponse(utilisateur=Utilisateur(id_uti['id']), acteur=Acteur(id_act['id']), contenu_mes=msg, date_mes=dat, heure_mes=her)
                                 rep.save()
+                                groupes = Groupe.objects.all().order_by("nom_groupe")
                                 messages.info(request,"Message envoyé à l'acteur!")
                                 return render (request, "envoyer_sms.html",locals())
                             else:
@@ -147,9 +149,9 @@ def envoyer_sms(request):
                                     nume = membre['acteur__telephone_act']
                                      #----send SMS------
                                     msg = urllib.parse.quote(msg)
-                                    source_num = "+25779612730".replace("+","")
+                                    source_num = "+25761192268".replace("+","")
                                     nume.replace("+","")
-                                    url = "http://localhost:13013/cgi-bin/sendsms?username=humura&password=CHANGE-ME&from="+source_num+"&to="+nume+"&text="+msg+""
+                                    url = "http://localhost:13013/cgi-bin/sendsms?username=?&password=?&from="+source_num+"&to="+nume+"&text="+msg+""
                                     urllib.request.urlopen(url)
                                     msg = msg.replace("%20"," ")
                                     dat = datetime.today()
@@ -182,40 +184,44 @@ def afficher_sms_recu(request):
                 if "+257" in num_sms_recu:
                     num_sms_recu = num_sms_recu.replace("+257","")
                 if Acteur.objects.filter(telephone_act=num_sms_recu, etat_act="non bloquer").exists():
-                    id_act = Acteur.objects.values("id").get(telephone_act=num_sms_recu)
-                    id_col = Colline.objects.values("id").get(acteur=id_act)
-                    dat = datetime.today()
-                    her = (datetime.now() + timedelta(hours=2))
-                    her.strftime('%H:%M')
-                    report = Reports(acteur=Acteur(id_act['id']), contenu_mes=sms_recu, date_mes=dat, heure_mes=her, colline=Colline(id_col['id']))
-                    report.save()
-                    #----------SMS acc de reception----------
-                    msg_acc = "Murakoze ubutumwa bwanyu burashitse kuri centre humura"
-                    msg_acc = urllib.parse.quote(msg_acc)
-                    source_num = "+25779612730".replace("+","")
-                    url = "http://localhost:13013/cgi-bin/sendsms?username=humura&password=CHANGE-ME&from="+source_num+"&to="+num_sms_recu+"&text="+msg_acc+""
-                    urllib.request.urlopen(url)
-                    #----------notifier les utilisateur----------
-                    list_utilisateurs = Utilisateur.objects.values('user__username').filter(user__is_active=True)
                     try:
-                        colline = Colline.objects.values("nom_col").get(acteur__telephone_act=num_sms_recu)
-                    except Colline.DoesNotExist:
-                        colline = None
-                    for utilisateur in list_utilisateurs:
-                        msg_notification = "Ubutumwa buvuye kumutumba "+colline['nom_col']+" burungitswe na "+num_sms_recu+" : "+sms_recu
-                        msg_notification = urllib.parse.quote(msg_notification)
-                        source_num = "+25779612730".replace("+","")
-                        num_utilisteur = utilisateur['user__username']
-                        url = "http://localhost:13013/cgi-bin/sendsms?username=humura&password=CHANGE-ME&from="+source_num+"&to="+num_utilisteur+"&text="+msg_notification+""
+                        id_act = Acteur.objects.values("id").get(telephone_act=num_sms_recu)
+                        id_col = Colline.objects.values("id").get(acteur=id_act['id'])
+                        dat = datetime.today()
+                        her = (datetime.now() + timedelta(hours=2))
+                        her.strftime('%H:%M')
+                        report = Reports(acteur=Acteur(id_act['id']), contenu_mes=sms_recu, date_mes=dat, heure_mes=her, colline=Colline(id_col['id']))
+                        report.save()
+                        #----------SMS acc de reception----------
+                        msg_acc = "Murakoze ubutumwa bwanyu burashitse kuri centre humura"
+                        msg_acc = urllib.parse.quote(msg_acc)
+                        source_num = "+25761192268".replace("+","")
+                        url = "http://localhost:13013/cgi-bin/sendsms?username=?&password=?&from="+source_num+"&to="+num_sms_recu+"&text="+msg_acc+""
                         urllib.request.urlopen(url)
-                    try:
-                        user = Utilisateur.objects.values('nom_uti','prenom_uti','profil').get(user__username=request.user.username)
-                        if user['profil'] == "simple":
-                            profil = True #pour differencie menu de admin et simple
-                    except Utilisateur.DoesNotExist:
-                        user = None
-                    reports = Reports.objects.values("id","contenu_mes","date_mes","heure_mes","categories__nom_cat","acteur__prenom_act","acteur__telephone_act").order_by("-date_mes","-heure_mes")
-                    return render(request, "afficher_sms_recu.html", locals())
+                        #----------notifier les utilisateur----------
+                        list_utilisateurs = Utilisateur.objects.values('user__username').filter(user__is_active=True)
+                        try:
+                            colline = Colline.objects.values("nom_col").get(acteur__telephone_act=num_sms_recu)
+                        except Colline.DoesNotExist:
+                            colline = None
+                        for utilisateur in list_utilisateurs:
+                            msg_notification = "Ubutumwa buvuye kumutumba "+colline['nom_col']+" burungitswe na "+num_sms_recu+" : "+sms_recu
+                            msg_notification = urllib.parse.quote(msg_notification)
+                            source_num = "+25761192268".replace("+","")
+                            num_utilisteur = utilisateur['user__username']
+                            url = "http://localhost:13013/cgi-bin/sendsms?username=?&password=?&from="+source_num+"&to="+num_utilisteur+"&text="+msg_notification+""
+                            urllib.request.urlopen(url)
+                        try:
+                            user = Utilisateur.objects.values('nom_uti','prenom_uti','profil').get(user__username=request.user.username)
+                            if user['profil'] == "simple":
+                                profil = True #pour differencie menu de admin et simple
+                        except Utilisateur.DoesNotExist:
+                            user = None
+                        reports = Reports.objects.values("id","contenu_mes","date_mes","heure_mes","categories__nom_cat","acteur__prenom_act","acteur__telephone_act").order_by("-date_mes","-heure_mes")
+                        show_logout_btn = True #afficher logout button
+                        return render(request, "afficher_sms_recu.html", locals())
+                    except ObjectDoesNotExist:
+                        return render(request, "afficher_sms_recu.html", locals())
         else:
             try:
                 user = Utilisateur.objects.values('nom_uti','prenom_uti','profil').get(user__username=request.user.username)
@@ -224,6 +230,7 @@ def afficher_sms_recu(request):
             except Utilisateur.DoesNotExist:
                 user = None
             reports = Reports.objects.values("id","contenu_mes","date_mes","heure_mes","categories__nom_cat","acteur__prenom_act","acteur__telephone_act").order_by("-date_mes","-heure_mes")
+            show_logout_btn = True #afficher logout button
             return render(request, "afficher_sms_recu.html", locals())
 
 
@@ -261,6 +268,7 @@ def repondre_sms_recu(request, id_msg):
 
 def transferer_sms_recu(request, id_msg):
     user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
+    groupes = Groupe.objects.all().order_by("nom_groupe")
     if user['profil'] == "simple":
         profil = True #pour differencie menu de admin et simple
     report = Reports.objects.values("contenu_mes").get(pk = id_msg)
@@ -269,6 +277,7 @@ def transferer_sms_recu(request, id_msg):
 #visualisation
 def get_visauliser_page(request):
     user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
+    show_logout_btn = True #afficher logout button
     if user['profil'] == "simple":
         profil = True #pour differencie menu de admin et simple
     return render(request, "visualisation.html", locals())
@@ -278,6 +287,10 @@ def visualiser_data(request):
         generate_typ = request.POST.get("select_typ_vis")
         date_debut = request.POST.get("dat_deb")
         date_fin = request.POST.get("dat_fin")
+        user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
+        show_logout_btn = True #afficher logout button
+        if user['profil'] == "simple":
+            profil = True #pour differencie menu de admin et simple
         if len(generate_typ) == 0 or len(date_debut) == 0 or len(date_fin) == 0:
             messages.info(request,"Selectionnez svp le type, date de debut et date de fin !")
             type_msg = "error"
@@ -324,6 +337,7 @@ def afficher_province(request):
     try:
         user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
         provinces = Province.objects.all().order_by("id")
+        show_logout_btn = True #afficher logout button
         return render(request,"province.html",locals())
     except ObjectDoesNotExist:
         return redirect("auth_url")
@@ -352,8 +366,9 @@ def supprimer_province(request, id_p):
         return redirect("pro_url")
 
 def editer_province(request, id_p):
+    user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
     provinces = Province.objects.get(pk = id_p)
-    return render(request,"province_edit.html",{'provinces':provinces})
+    return render(request,"province_edit.html",{'provinces':provinces, 'user':user})
 
 def update_province(request, id_p):
     if request.method == "POST":
@@ -374,6 +389,7 @@ def afficher_commune(request):
         user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
         communes = Commune.objects.values('id','province__nom_pro','nom_com').order_by("id")
         provinces = Province.objects.all().order_by("nom_pro")
+        show_logout_btn = True #afficher logout button
         return render(request, "commune.html", locals())
     except ObjectDoesNotExist:
         return redirect("auth_url")
@@ -410,6 +426,7 @@ def supprimer_commune(request, id_cm):
         return redirect("cm_url")
 
 def editer_commune(request, id_cm):
+    user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
     communes = Commune.objects.get(pk = id_cm)
     provinces = Province.objects.all().order_by("nom_pro")
     id_province = Commune.objects.values("province").get(pk=id_cm)
@@ -444,6 +461,7 @@ def afficher_colline(request):
         acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').filter(etat_act='non bloquer').order_by("nom_act")
         communes = Commune.objects.all().order_by("id")
         collines = Colline.objects.values('id','commune__nom_com','nom_col','acteur__nom_act','acteur__prenom_act','acteur__telephone_act').order_by("id")
+        show_logout_btn = True #afficher logout button
         return render(request, "colline.html", locals())
     except ObjectDoesNotExist:
         return redirect("auth_url")
@@ -458,7 +476,7 @@ def ajouter_colline(request):
             acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').filter(etat_act='non bloquer').order_by("nom_act")
             communes = Commune.objects.all().order_by("id")
             collines = Colline.objects.values('id','commune__nom_com','nom_col','acteur__nom_act','acteur__prenom_act','acteur__telephone_act').order_by("id")
-            messages.info(request,"Selectionnez l'acteur' !")
+            messages.info(request,"Selectionnez l'acteur !")
             type_msg = "error"
             return render(request,"colline.html",locals())
         elif len(com) == 0:
@@ -500,6 +518,7 @@ def supprimer_colline(request, id_co):
         return redirect("col_url")
 
 def editer_colline(request, id_co):
+    user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
     collines = Colline.objects.get(pk = id_co)
     communes = Commune.objects.all().order_by("id")
     acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').filter(etat_act='non bloquer').order_by("nom_act")
@@ -511,7 +530,7 @@ def editer_colline(request, id_co):
 def update_colline(request, id_co):
     if request.method == "POST":
         com = request.POST.get("select_com")
-        col = request.POST.get("nom_com").strip()
+        col = request.POST.get("nom_col").strip()
         act = request.POST.get("select_act")
         if len(col) == 0:
             messages.info(request,"Attention, vous n'avez pas mis la nouvelle valeur !!")
@@ -523,17 +542,29 @@ def update_colline(request, id_co):
             messages.info(request,"Attention, vous n'avez pas mis la nouvelle valeur !!")
             return redirect("col_url")
         else:
-            if Colline.objects.filter(acteur=act).exists():
-                messages.info(request,"Echec, l'acteur est responsable d'une autre colline !")
-                return redirect("col_url")
+            if Colline.objects.filter(nom_col=col).exists() or Colline.objects.filter(nom_col=col).exists():
+                if Colline.objects.filter(acteur=act).exists():
+                    co = Colline.objects.get(pk = id_co)
+                    co.commune = Commune(com)
+                    co.save()
+                    messages.info(request,"Echec, l'acteur est responsable d'une autre colline !")
+                    return redirect("col_url")
+                else:
+                    co = Colline.objects.get(pk = id_co)
+                    co.commune = Commune(com)
+                    co.nom_col = col
+                    co.acteur = Acteur(act)
+                    co.save()
+                    messages.info(request,"La modification est reussie avec succes !")
+                    return redirect("col_url")
             else:
                 co = Colline.objects.get(pk = id_co)
                 co.commune = Commune(com)
                 co.nom_col = col
-                co.acteur = Acteur(act)
+                #co.acteur = Acteur(act)
                 co.save()
-                messages.info(request,"La modification est reussie avec succes !")
-                return redirect("col_url")
+                messages.info(request,"La modification du nom de la colline ou de la commune est reussie avec succes !")
+                return redirect("col_url")  
 
 
 
@@ -542,6 +573,7 @@ def afficher_categorie(request):
     try:
         user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
         categories = Categorie.objects.all().order_by("id")
+        show_logout_btn = True #afficher logout button
         return render(request,"categorie.html",locals())
     except ObjectDoesNotExist:
         return redirect("auth_url")
@@ -580,8 +612,9 @@ def editer_categorie(request, id_cat):
         messages.info(request,"C'est la categorie par defaut il ne faut pas la modifiée svp !")
         return redirect("cat_url")
     else:
+        user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
         categorie = Categorie.objects.get(pk = id_cat)
-        return render(request,"categorie_edit.html",{'categories':categorie})
+        return render(request,"categorie_edit.html",{'categories':categorie, 'user':user})
 
 def update_categorie(request, id_cat):
     if request.method == "POST":
@@ -602,6 +635,7 @@ def afficher_groupe(request):
     try:
         user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
         groupes = Groupe.objects.all().order_by("id")
+        show_logout_btn = True #afficher logout button
         return render(request,"groupe.html",locals())
     except ObjectDoesNotExist:
         return redirect("auth_url")
@@ -630,8 +664,9 @@ def supprimer_groupe(request, id_g):
         return redirect("grp_url")
 
 def editer_groupe(request, id_g):
+    user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
     groupes = Groupe.objects.get(pk = id_g)
-    return render(request,"groupe_edit.html",{'groupes':groupes})
+    return render(request,"groupe_edit.html",{'groupes':groupes, 'user':user})
 
 def update_groupe(request, id_g):
     if request.method == "POST":
@@ -652,6 +687,7 @@ def afficher_acteur(request):
     try:
         user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
         acteurs = Acteur.objects.all().order_by("nom_act")
+        show_logout_btn = True #afficher logout button
         return render(request,"acteur.html",locals())
     except ObjectDoesNotExist:
         return redirect("auth_url")
@@ -700,6 +736,7 @@ def supprimer_acteur(request, id_act):
         return redirect("act_url")
 
 def editer_acteur(request, id_act):
+    user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
     acteur = Acteur.objects.get(pk = id_act)
     etat = Acteur.objects.values("etat_act").get(pk=id_act)
     return render(request,"acteur_edit.html",locals())
@@ -740,6 +777,7 @@ def afficher_acteur_groupe(request):
         acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').filter(etat_act='non bloquer').order_by("nom_act")
         groupes = Groupe.objects.all().order_by("id")
         acteur_groupe = Acteur_groupe.objects.values('id','acteur__nom_act','acteur__prenom_act','acteur__telephone_act','groupe__nom_groupe','etat_act_group').order_by("id")
+        show_logout_btn = True #afficher logout button
         return render(request, "acteur_groupe.html", locals())
     except ObjectDoesNotExist:
         return redirect("auth_url")
@@ -772,11 +810,12 @@ def ajouter_acteur_groupe(request):
             else:
                 act = Acteur_groupe(acteur = Acteur(acteur), groupe = Groupe(groupe), etat_act_group = etat)
                 act.save()
-                messages.info(request, "Enregistrement reussi avec succes !")
+                messages.info(request, "Integration reussi avec succes !")
                 return redirect("actgrp_url")
 
 
 def editer_acteur_groupe(request, id_actgrp):
+    user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
     acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').filter(etat_act='non bloquer').order_by("nom_act")
     acteur_select = Acteur_groupe.objects.values('id','acteur','acteur__nom_act','acteur__prenom_act','acteur__telephone_act').get(pk=id_actgrp)
     groupes = Groupe.objects.all().order_by("id")
@@ -812,6 +851,7 @@ def afficher_utilisateur(request):
     try:
         user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
         utilisateurs = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'num_id_uti','user__username', 'profil', 'user__is_active').order_by("nom_uti")
+        show_logout_btn = True #afficher logout button
         return render(request,"utilisateur.html",locals())
     except ObjectDoesNotExist:
         return redirect("auth_url")
@@ -870,8 +910,9 @@ def supprimer_utilisateur(request, id_util):
         return redirect("util_url")
         
 def editer_utilisateur(request, id_util):
+    user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
     utilisateurs = Utilisateur.objects.values('id', 'nom_uti', 'prenom_uti', 'user__username','num_id_uti', 'user__is_active', 'profil').get(pk=id_util)
-    return render(request, "utilisateur_edit.html", {'utilisateurs':utilisateurs})
+    return render(request, "utilisateur_edit.html", {'utilisateurs':utilisateurs, 'user':user})
 
 def update_utilisateur(request, id_util):
     if request.method == "POST":
@@ -902,7 +943,6 @@ def update_utilisateur(request, id_util):
 
 #change_pwd
 def afficher_change_pwd(request):
-    user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
     return render(request,"change_password.html",locals())
 
 def change_pwd(request):
@@ -921,16 +961,21 @@ def change_pwd(request):
                 messages.info(request, "Echec,nouveau mot de passe et sa confirmation ne sont pas identifque !")
                 return render(request,"change_password.html",{'type_msg':type_msg})
             else:
-                user= User.objects.get(username=num)
-                passwd_exist = user.check_password(anc_pass)
-                if user and passwd_exist:
-                    user.set_password(nouv_pass)
-                    user.save()
-                    messages.info(request, "Ok, maintenant vous avez le nouveau mode passe !")
-                    return render(request,"change_password.html")
-                else:
+                try:
+                    user = User.objects.get(username=num)
+                    passwd_exist = user.check_password(anc_pass)
+                
+                    if user and passwd_exist:
+                        user.set_password(nouv_pass)
+                        user.save()
+                        messages.info(request, "Ok, maintenant vous avez le nouveau mot passe !")
+                        return render(request,"change_password.html")
+                    else:
+                        type_msg = "error"
+                        messages.info(request, "Echec,le numero ou le mot de passe n'existe pas ou vous êtes bloqué !")
+                        return render(request,"change_password.html",{'type_msg':type_msg})
+                except ObjectDoesNotExist:
                     type_msg = "error"
-                    messages.info(request, "Echec,le numero ou le mot de passe n'existe pas ou vous êtes bloqué !")
+                    messages.info(request, "Echec,le numero ou l'ancien mot de passe n'existe pas ou vous êtes bloqué !")
                     return render(request,"change_password.html",{'type_msg':type_msg})
-
 
