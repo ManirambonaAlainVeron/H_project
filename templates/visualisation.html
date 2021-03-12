@@ -60,47 +60,51 @@
 
   {% block js %}
             <script>
-               
-                $(function () {
-                    var data1 = JSON.parse("{{data|escapejs}}"); 
-                    console.log(data1.labels)
-                    console.log(data1.data)
-                    var ctx = document.getElementById('myChart').getContext('2d');
-                    var myChart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: data1.labels,
-                            datasets: [{
-                                label: 'Cas rapportés',
-                                backgroundColor: 'green',
-                                data: data1.data,
-                                
-                            }]
-                        },
-                        options: {
-                            scales: {
-                                yAxes: [{
-                                    ticks: {
-                                        beginAtZero: true,
-                                    }
-                                }],
-                                xAxes: [{
-                                    barPercentage: 0.5,
-                                    gridLines: {
-                                        tickMarkLength: 15  
-                                      },
+                var data = "{{data|escapejs}}";
+                if (Object.keys(data).length === 0) {
+                    console.log("jjjjjjjjjjjjjjjjjj");
+                }
+                else
+                {
+                    $(function () {
+                        var data1 = JSON.parse("{{data|escapejs}}"); 
+                        var ctx = document.getElementById('myChart').getContext('2d');
+                        var myChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: data1.labels,
+                                datasets: [{
+                                    label: 'Cas rapportés',
+                                    backgroundColor: 'green',
+                                    data: data1.data,
+                                    
                                 }]
                             },
-                            responsive: true,
-                            legend: {
-                                position: 'top',
-                            },
-                            title: {
-                                display: true,
-                                text: 'Les cas rapportés'
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero: true,
+                                        }
+                                    }],
+                                    xAxes: [{
+                                        barPercentage: 0.5,
+                                        gridLines: {
+                                            tickMarkLength: 15  
+                                        },
+                                    }]
+                                },
+                                responsive: true,
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Les cas rapportés'
+                                }
                             }
-                        }
+                        });
                     });
-                });
+                }
             </script>
 {% endblock js %}
