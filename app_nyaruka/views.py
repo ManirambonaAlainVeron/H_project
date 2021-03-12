@@ -108,7 +108,7 @@ def envoyer_sms(request):
                                 msg = urllib.parse.quote(msg)
                                 source_num = "+25761192268".replace("+","")
                                 numero.replace("+","")
-                                url = "http://localhost:13013/cgi-bin/sendsms?username=humura&password=CHANGE-ME&from="+source_num+"&to="+numero+"&text="+msg+""
+                                url = "http://localhost:13013/cgi-bin/sendsms?username=&password=&from="+source_num+"&to="+numero+"&text="+msg+""
                                 urllib.request.urlopen(url)
                                 msg = msg.replace("%20"," ")
                                 dat = datetime.today()
@@ -151,7 +151,7 @@ def envoyer_sms(request):
                                     msg = urllib.parse.quote(msg)
                                     source_num = "+25761192268".replace("+","")
                                     nume.replace("+","")
-                                    url = "http://localhost:13013/cgi-bin/sendsms?username=humura&password=CHANGE-ME&from="+source_num+"&to="+nume+"&text="+msg+""
+                                    url = "http://localhost:13013/cgi-bin/sendsms?username=&password=&from="+source_num+"&to="+nume+"&text="+msg+""
                                     urllib.request.urlopen(url)
                                     msg = msg.replace("%20"," ")
                                     dat = datetime.today()
@@ -196,7 +196,7 @@ def afficher_sms_recu(request):
                         msg_acc = "Murakoze ubutumwa bwanyu burashitse kuri centre humura"
                         msg_acc = urllib.parse.quote(msg_acc)
                         source_num = "+25761192268".replace("+","")
-                        url = "http://localhost:13013/cgi-bin/sendsms?username=humura&password=CHANGE-ME&from="+source_num+"&to="+num_sms_recu+"&text="+msg_acc+""
+                        url = "http://localhost:13013/cgi-bin/sendsms?username=&password=&from="+source_num+"&to="+num_sms_recu+"&text="+msg_acc+""
                         urllib.request.urlopen(url)
                         #----------notifier les utilisateur----------
                         list_utilisateurs = Utilisateur.objects.values('user__username').filter(user__is_active=True)
@@ -209,7 +209,7 @@ def afficher_sms_recu(request):
                             msg_notification = urllib.parse.quote(msg_notification)
                             source_num = "+25761192268".replace("+","")
                             num_utilisteur = utilisateur['user__username']
-                            url = "http://localhost:13013/cgi-bin/sendsms?username=humura&password=CHANGE-ME&from="+source_num+"&to="+num_utilisteur+"&text="+msg_notification+""
+                            url = "http://localhost:13013/cgi-bin/sendsms?username=&password=&from="+source_num+"&to="+num_utilisteur+"&text="+msg_notification+""
                             urllib.request.urlopen(url)
                         try:
                             user = Utilisateur.objects.values('nom_uti','prenom_uti','profil').get(user__username=request.user.username)
