@@ -41,17 +41,26 @@
               <th class="th-sm">Categorie
         
               </th>
+              <th class="th-sm">Prise en charge
+                
+              </th>
               <th class="th-sm">Acteur
         
               </th>
               <th class="th-sm">Numero de l'acteur
         
               </th>
+              <th class="th-sm">Colline
+          
+              </th>
               <th >
         
               </th>
               <th >
         
+              </th>
+              <th >
+            
               </th>
               <th >
             
@@ -68,30 +77,38 @@
                         <td>{{item.date_mes}}</td>
                         <td>{{item.heure_mes}}</td>
                         <td>{{item.categories__nom_cat}}</td>
+                        <td>{{item.prise_charge__designation}}</td>
                         <td>{{item.acteur__prenom_act}}</td>
                         <td>{{item.acteur__telephone_act}}</td>
+                        <td>{{item.colline__nom_col}}</td>
                         <td>
                             <form action="{% url 'reprpt_url' item.id %}" method="POST">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-primary">Repondre</button>
+                                <button type="submit" class="btn btn-primary" style="padding:3px">Repondre</button>
                             </form>
                         </td>
                         <td>
                             <form action="{% url 'catrpt_url' item.id %}" method="POST">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-warning">categoriser</button>
+                                <button type="submit" class="btn btn-warning" style="padding:3px;" Tooltip="bjr">categoriser</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="{% url 'chrgrpt_url' item.id %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-info" style="padding-top:2px; padding-bottom:2px" data-toggle="tooltip" data-placement="top" title="mis le prise en charge sur un cas">charge</button>
                             </form>
                         </td>
                         <td>
                             <form action="{% url 'trsfrpt_url' item.id %}" method="POST">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-success">Transferer</button>
+                                <button type="submit" class="btn btn-success" style="padding:3px">Transferer</button>
                             </form>
                         </td>
                         <td>
                             <form action="{% url 'del_msg_recu_url' item.id %}" method="POST">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-danger">supprimer</button>
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment effacer ce message?')" style="padding:3px">supprimer</button>
                             </form>
                         </td>
                     </tr>
@@ -116,10 +133,16 @@
                 <th class="th-sm">Categorie
           
                 </th>
+                <th class="th-sm">Prise en charge
+                
+                </th>
                 <th class="th-sm">Acteur
           
                 </th>
                 <th class="th-sm">Numero de l'acteur
+          
+                </th>
+                <th class="th-sm">Colline
           
                 </th>
                 <th >
@@ -127,6 +150,9 @@
                 </th>
                 <th >
           
+                </th>
+                <th >
+              
                 </th>
                 <th >
               

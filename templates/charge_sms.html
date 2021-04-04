@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if type_msg %}
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if messages %}
+            <div class="alert alert-primary " role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+    
+             <form action="{% url 'up_chrgrpt_url' rap.id %}" method="POST">
+                 {% csrf_token %}
+                 <div class="row mt-5 h-100 justify-content-center align-items-center">
+                    <div>
+                        <label for="select_prise" style="width: 150px;">Prise en charge :</label>
+                        <select class="form-control my_chosen" name="select_prise"  id="select_prise" style="width: 228px;">
+                            <option value="">Selectionnez</option>
+                            {% for item in prise_charge %}
+                                <option value="{{item.id}}" class="{{item.designation}}">{{item.designation}}</option>
+                            {% endfor %}
+                        </select>
+                     </div>
+                 </div>
+                 <div class="row mt-3 justify-content-center align-items-center">
+                    <a  class="btn btn-default"  href="{% url 'rpt_url' %}" style="text-decoration: none;"><< Messages reçu</a>
+                    <button type="submit" class="btn btn-primary mr-5">Ok</button>
+                 </div>
+             </form>   
+{% endblock content %}

@@ -63,7 +63,7 @@
                         <td>
                             <form action="delmsgenv/{{item.id}}" method="POST">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-danger">supprimer</button>
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment effacer ce message?')">supprimer</button>
                             </form>
                         </td>
                     </tr>

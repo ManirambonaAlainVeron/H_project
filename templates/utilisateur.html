@@ -131,7 +131,7 @@
                                 <td>
                                     <form action="delutil/{{item.id}}" method="POST">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-danger" style="padding-top:2px;padding-bottom: 2px;">supprimer</button>
+                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment effacer cet element?')" style="padding-top:2px;padding-bottom: 2px;">supprimer</button>
                                     </form>
                                 </td>
                             </tr>

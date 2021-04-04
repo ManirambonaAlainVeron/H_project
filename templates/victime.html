@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if type_msg %}
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if messages %}
+            <div class="alert alert-primary " role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+    <form action="addvict" method="POST">
+        {% csrf_token %}
+        <div class="row mt-4  justify-content-center align-items-center" >
+            <div>
+                <div class="form-inline">
+                    <label for="nom_v" style="width: 150px;">Nom :</label>
+                    <input type="text" name="nom_v" id="nom_v" class="form-control" autocomplete="off" style="height: 25px;">
+                </div>
+                <div class="form-inline mt-4">
+                    <label for="prenom_v" style="width: 150px;">Prenom :</label>
+                    <input type="text" name="prenom_v" id="prenom_v" class="form-control" autocomplete="off" style="height: 25px;">
+                </div>
+                <div class="form-inline mt-4">
+                    <label for="sexe_v" style="width: 150px;">Sexe :</label>
+                    <select name="sexe_v" id="sexe_v" class="form-control my_chosen" style="width: 228px;">
+                        <option value="" class="">Selectionnez le sexe</option>
+                        <option value="Masculin" class="Masculin">Masculin</option>
+                        <option value="Feminin" class="Feminin">Feminin</option>
+                    </select>
+                </div>
+                <div class="form-inline mt-4">
+                    <label for="age_v" style="width: 150px;">Age :</label>
+                    <input type="text" name="age_v" id="age_v" class="form-control" autocomplete="off" style="height: 25px;">
+                </div>
+                <div class="form-inline mt-4">
+                    <label for="interv_age" style="width: 150px;">Intervalle d'age :</label>
+                    <select name="interv_age" id="interv_age" class="form-control my_chosen" style="width: 228px;">
+                        <option value="" class="">Selectionnez l' intervalle</option>
+                        <option value="0 à 5" class="0 à 5">0 à 5</option>
+                        <option value="6 à 10" class="6 à 10">6 à 10</option>
+                        <option value="11 à 15" class="11 à 15">11 à 15</option>
+                        <option value="16 à 20" class="16 à 20">16 à 20</option>
+                        <option value="21 à 25" class="21 à 25">21 à 25</option>
+                        <option value="26 à 30" class="26 à 30">26 à 30</option>
+                        <option value="31 à 35" class="31 à 35">31 à 35</option>
+                        <option value="36 à 40" class="36 à 40">36 à 40</option>
+                        <option value="41 à 45" class="41 à 45">41 à 45</option>
+                        <option value="46 et plus" class="46 et plus">46 et plus</option>
+                    </select>
+                </div>
+                <div class="form-inline mt-4">
+                    <label for="date_ev" style="width: 160px;">Date de l'evenement :</label>
+                    <input type="date" name="date_ev" id="date_ev" class="form-control" autocomplete="off" style="height: 25px; width: 220px;">
+                </div>
+            </div>
+            <div class="ml-5">
+                <div class="form-inline">
+                    <label for="education_v" style="margin-right: 55px;">Niveau d'education :</label>
+                    <select name="education_v" id="education_v" class="form-control my_chosen" style="width: 228px;">
+                        <option value="" class="">Selectionnez</option>
+                        <option value="prescolaire" class="prescolaire">préscolaire</option>
+                        <option value="primaire" class="primaire">primaire</option>
+                        <option value="fondamental fréquenté" class="fondamental fréquenté">fondamental fréquenté(e)</option>
+                        <option value="fondamental achevé" class="fondamental achevé">fondamental achevé(e)</option>
+                        <option value="post fondamental fréquenté" class="post fondamental fréquenté">post fondamental fréquenté(e)</option>
+                        <option value="post fondamental achevé" class="post fondamental achevé">post fondamental achevé(e)</option>
+                        <option value="supérieur fréquenté" class="supérieur fréquenté">supérieur fréquenté</option>
+                        <option value="supérieur achevé" class="supérieur achevé">supérieur achevé</option>
+                    </select>
+                </div>
+                <div class="form-inline mt-4">
+                    <label for="statut_matri" style="margin-right: 60px;">Statut matrimonial :</label>
+                    <select name="statut_matri" id="statut_matri" class="form-control my_chosen" style="width: 228px;">
+                        <option value="" class="">Selectionnez</option>
+                        <option value="Marié" class="Marié">Marié(e)</option>
+                        <option value="Union libre" class="Union libre">Union libre</option>
+                        <option value="Célibataire" class="Célibataire">Célibataire</option>
+                        <option value="Veuf" class="Veuf">Veuf(ve)</option>
+                        <option value="Divorcé" class="Divorcé">Divorcé(e)</option>
+                        <option value="Séparé" class="Séparé">Séparé(e)</option>
+                        <option value="Fille mère" class="Fille mère">Fille mère</option>
+                        <option value="Enfant" class="Enfant">Enfant</option>
+                        <option value="Enfant à charge" class="Enfant à charge">Enfant à charge</option>
+                        <option value="Paternité multiple" class="Paternité multiple">Paternité multiple</option>
+                        <option value="Union multiple" class="Union multiple">Union multiple</option>
+                    </select>
+                </div>
+                <div class="form-inline mt-4">
+                    <label for="situation_phy" style="margin-right: 60px;">Situation physique :</label>
+                    <select name="situation_phy" id="situation_phy" class="form-control my_chosen" style="width: 228px;">
+                        <option value="" class="">Selectionnez</option>
+                        <option value="Normale" class="Normale">Normale</option>
+                        <option value="NSP" class="NSP">NSP</option>
+                        <option value="handicapé" class="handicapé">handicapé(e)</option>
+                    </select>
+                </div>
+                <div class="form-inline mt-4">
+                    <label for="situation_psyco" style="width: 200px;">Situation psycho-médicale :</label>
+                    <select name="situation_psyco" id="situation_psyco" class="form-control my_chosen" style="width: 228px;">
+                        <option value="" class="">Selectionnez</option>
+                        <option value="Normale" class="Normale">Normale</option>
+                        <option value="Malade mentale" class="Malade mentale">Malade mentale</option>
+                        <option value="Ivre" class="Ivre">Ivre</option>
+                        <option value="Drogué" class="Drogué">Drogué</option>
+                        <option value="NSP" class="NSP">NSP</option>
+                    </select>
+                </div>
+                <div class="form-inline mt-4">
+                    <label for="situation_psyco_aut" style="width: 200px;">Situation psycho-médicale de l'auteur :</label>
+                    <select name="situation_psyco_aut" id="situation_psyco_aut" class="form-control my_chosen" style="width: 228px;">
+                        <option value="" class="">Selectionnez</option>
+                        <option value="Normale" class="Normale">Normale</option>
+                        <option value="Malade mentale" class="Malade mentale">Malade mental</option>
+                        <option value="Ivre" class="Ivre">Ivre</option>
+                        <option value="Drogué" class="Drogué">Drogué</option>
+                        <option value="NSP" class="NSP">NSP</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class=" row mt-4 justify-content-center align-items-center">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+    </form>
+        <div>
+            <div> 
+                <table table id="dtBasicExample" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                          <th class="th-sm">Nom
+                    
+                          </th>
+                          <th class="th-sm">Prenom
+                    
+                          </th>
+                          <th class="th-sm">Sexe
+                    
+                          </th>
+                          <th class="th-sm">Age
+                    
+                          </th>
+                          <th class="th-sm">Niveau education
+                    
+                          </th>
+                          <th class="th-sm">Status martimonial
+                    
+                          </th>
+                          <th class="th-sm">Situation physique
+                    
+                        </th>
+                        <th class="th-sm">Situation psycho-médicale
+                  
+                        </th>
+                        <th class="th-sm">Situation psycho-médicale auteur
+                  
+                        </th>
+                        <th class="th-sm">Date de l'evenement
+                  
+                        </th>
+                          <th>
+                    
+                          </th>
+                          <th>
+                        
+                          </th>
+                        </tr>
+                      </thead>
+                    <tbody>
+                        
+                        {% for item in victime %}  
+                            <tr>
+                                <td>{{item.nom_vict}}</td>
+                                <td>{{item.prenom_vict}}</td>
+                                <td>{{item.sexe_vict}}</td>
+                                <td>{{item.age_vict}}</td>
+                                <td>{{item.education_vict}}</td>
+                                <td>{{item.statut_mart}}</td>
+                                <td>{{item.situation_phy_vict}}</td>
+                                <td>{{item.situation_psycho_vict}}</td>
+                                <td>{{item.situation_psycho_auth}}</td>
+                                <td>{{item.date_evenement}}</td>
+                                <td>
+                                    <form action="edtvict/{{item.id}}" method="POST">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-primary" style="padding-top:2px;padding-bottom: 2px;">editer</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form action="delvict/{{item.id}}" method="POST">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment effacer cet element?')" style="padding-top:2px;padding-bottom: 2px;">supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr >
+                                <h2><td colspan="4" >Il n'y a pas des victimes enregistrés </td></h2>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th class="th-sm">Nom
+                      
+                            </th>
+                            <th class="th-sm">Prenom
+                      
+                            </th>
+                            <th class="th-sm">Sexe
+                      
+                            </th>
+                            <th class="th-sm">Age
+                      
+                            </th>
+                            <th class="th-sm">Niveau education
+                      
+                            </th>
+                            <th class="th-sm">Status martimonial
+                      
+                            </th>
+                            <th class="th-sm">Situation physique
+                      
+                          </th>
+                          <th class="th-sm">Situation psycho-médicale
+                    
+                          </th>
+                          <th class="th-sm">Situation psycho-médicale auteur
+                    
+                          </th>
+                          <th class="th-sm">Date de l'evenement
+                  
+                          </th>
+                            <th>
+                      
+                            </th>
+                            <th>
+                          
+                            </th>
+                          </tr>
+                      </tfoot>
+                    
+                </table>
+            </div>
+        </div>
+
+    {% endblock content %}

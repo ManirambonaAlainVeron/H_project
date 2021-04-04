@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
-from .models import Province, Colline, Commune, Acteur, Acteur_groupe, Utilisateur, Groupe, Categorie, Reports, Reponse
+from .models import Province, Colline, Commune, Acteur, Acteur_groupe, Utilisateur, Groupe, Categorie, Reports, Reponse, Prise_charge, Victime
 import ast
 from django.contrib.auth import authenticate, login, logout
 import urllib.parse
@@ -99,14 +99,14 @@ def envoyer_sms(request):
                             type_msg = "error"
                             return render (request, "envoyer_sms.html",locals())
                         else:
-                            #envoyer a un acteur
+                            #envoyer a un acteur[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]
                             if Acteur.objects.filter(telephone_act=numero, etat_act="non bloquer").exists():
                                 id_act = Acteur.objects.values('id').get(telephone_act=numero)
                                 username_util = request.user.username
                                 id_uti = Utilisateur.objects.values('id').get(user__username=username_util)
                                 #----------send SMS----------
                                 msg = urllib.parse.quote(msg)
-                                source_num = "+25761192268".replace("+","")
+                                source_num = "".replace("+","")
                                 numero.replace("+","")
                                 url = "http://localhost:13013/cgi-bin/sendsms?username=&password=&from="+source_num+"&to="+numero+"&text="+msg+""
                                 urllib.request.urlopen(url)
@@ -149,7 +149,7 @@ def envoyer_sms(request):
                                     nume = membre['acteur__telephone_act']
                                      #----send SMS------
                                     msg = urllib.parse.quote(msg)
-                                    source_num = "+25761192268".replace("+","")
+                                    source_num = "".replace("+","")
                                     nume.replace("+","")
                                     url = "http://localhost:13013/cgi-bin/sendsms?username=&password=&from="+source_num+"&to="+nume+"&text="+msg+""
                                     urllib.request.urlopen(url)
@@ -195,19 +195,20 @@ def afficher_sms_recu(request):
                         #----------SMS acc de reception----------
                         msg_acc = "Murakoze ubutumwa bwanyu burashitse kuri centre humura"
                         msg_acc = urllib.parse.quote(msg_acc)
-                        source_num = "+25761192268".replace("+","")
+                        source_num = "".replace("+","")
                         url = "http://localhost:13013/cgi-bin/sendsms?username=&password=&from="+source_num+"&to="+num_sms_recu+"&text="+msg_acc+""
                         urllib.request.urlopen(url)
                         #----------notifier les utilisateur----------
                         list_utilisateurs = Utilisateur.objects.values('user__username').filter(user__is_active=True)
                         try:
                             colline = Colline.objects.values("nom_col").get(acteur__telephone_act=num_sms_recu)
+                            act = Acteur.objects.values("prenom_act").get(telephone_act=num_sms_recu)
                         except Colline.DoesNotExist:
                             colline = None
                         for utilisateur in list_utilisateurs:
-                            msg_notification = "Ubutumwa buvuye kumutumba "+colline['nom_col']+" burungitswe na "+num_sms_recu+" : "+sms_recu
+                            msg_notification = "Ubutumwa buvuye kumutumba "+colline['nom_col']+" burungitswe na "+act['prenom_act']+" numero "+num_sms_recu+" : "+sms_recu
                             msg_notification = urllib.parse.quote(msg_notification)
-                            source_num = "+25761192268".replace("+","")
+                            source_num = "".replace("+","")
                             num_utilisteur = utilisateur['user__username']
                             url = "http://localhost:13013/cgi-bin/sendsms?username=&password=&from="+source_num+"&to="+num_utilisteur+"&text="+msg_notification+""
                             urllib.request.urlopen(url)
@@ -217,7 +218,7 @@ def afficher_sms_recu(request):
                                 profil = True #pour differencie menu de admin et simple
                         except Utilisateur.DoesNotExist:
                             user = None
-                        reports = Reports.objects.values("id","contenu_mes","date_mes","heure_mes","categories__nom_cat","acteur__prenom_act","acteur__telephone_act").order_by("-date_mes","-heure_mes")
+                        reports = Reports.objects.values("id","contenu_mes","date_mes","heure_mes","categories__nom_cat","prise_charge__designation","acteur__prenom_act","acteur__telephone_act", "colline__nom_col").order_by("-date_mes","-heure_mes")
                         show_logout_btn = True #afficher logout button
                         return render(request, "afficher_sms_recu.html", locals())
                     except ObjectDoesNotExist:
@@ -229,7 +230,7 @@ def afficher_sms_recu(request):
                     profil = True #pour differencie menu de admin et simple
             except Utilisateur.DoesNotExist:
                 user = None
-            reports = Reports.objects.values("id","contenu_mes","date_mes","heure_mes","categories__nom_cat","acteur__prenom_act","acteur__telephone_act").order_by("-date_mes","-heure_mes")
+            reports = Reports.objects.values("id","contenu_mes","date_mes","heure_mes","categories__nom_cat","prise_charge__designation","acteur__prenom_act","acteur__telephone_act", "colline__nom_col").order_by("-date_mes","-heure_mes")
             show_logout_btn = True #afficher logout button
             return render(request, "afficher_sms_recu.html", locals())
 
@@ -247,6 +248,14 @@ def categorise_sms_recu(request, id_msg):
     categories = Categorie.objects.values("id","nom_cat")
     return render(request, "categorise_sms.html", locals())
 
+def charge_sms_recu(request, id_msg):
+    user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
+    if user['profil'] == "simple":
+        profil = True #pour differencie menu de admin et simple
+    rap = Reports.objects.values("id").get(pk=id_msg)
+    prise_charge = Prise_charge.objects.values("id","designation")
+    return render(request, "charge_sms.html", locals())
+
 def update_cat_sms_recu(request, id_msg):
     cat = request.POST.get('select_cat')
     if len(cat) == 0:
@@ -257,6 +266,18 @@ def update_cat_sms_recu(request, id_msg):
         rep.categories = Categorie(cat)
         rep.save()
         messages.info(request,"Le message est categorisé avec succes !")
+        return redirect("rpt_url")
+
+def update_chrg_sms_recu(request, id_msg):
+    p = request.POST.get('select_prise')
+    if len(p) == 0:
+        messages.info(request,"Attention, vous n'avez pas mis le prise en charge fait-le svp !!")
+        return redirect("rpt_url")
+    else:
+        rep = Reports.objects.get(pk = id_msg)
+        rep.prise_charge = Prise_charge(p)
+        rep.save()
+        messages.info(request,"succes !")
         return redirect("rpt_url")
 
 def repondre_sms_recu(request, id_msg):
@@ -321,7 +342,19 @@ def visualiser_data(request):
                     data={'labels':nom_com, 'data':nbr_cas}
                     dataJSON = dumps(data) 
                     return render(request, "visualisation.html", {'data':dataJSON})
-                else :
+
+                elif generate_typ == "charge":
+                    nom_chrg = []
+                    nbr_cas = []
+                    queryset = Reports.objects.values('prise_charge__designation').annotate(nbr_cas=Count('id')).filter(date_mes__gte=date_debut, date_mes__lte=date_fin)
+                    for element in queryset:
+                        nom_chrg.append(element['prise_charge__designation'])
+                        nbr_cas.append(element['nbr_cas'])
+                    data = {'labels':nom_chrg, 'data':nbr_cas}
+                    dataJSON = dumps(data) 
+                    return render(request, "visualisation.html", {'data':dataJSON})
+
+                elif generate_typ == "categorie":
                     nom_cat = []
                     nbr_cas = []
                     queryset = Reports.objects.values('categories__nom_cat').annotate(nbr_cas=Count('id')).filter(date_mes__gte=date_debut, date_mes__lte=date_fin)
@@ -329,6 +362,72 @@ def visualiser_data(request):
                         nom_cat.append(element['categories__nom_cat'])
                         nbr_cas.append(element['nbr_cas'])
                     data = {'labels':nom_cat, 'data':nbr_cas}
+                    dataJSON = dumps(data) 
+                    return render(request, "visualisation.html", {'data':dataJSON})
+
+                elif generate_typ == "intervalle":
+                    inter = []
+                    nbr_cas = []
+                    queryset = Victime.objects.values('inter_age').annotate(nbr_cas=Count('id')).filter(date_evenement__gte=date_debut, date_evenement__lte=date_fin)
+                    for element in queryset:
+                        inter.append(element['inter_age'])
+                        nbr_cas.append(element['nbr_cas'])
+                    data = {'labels':inter, 'data':nbr_cas}
+                    dataJSON = dumps(data) 
+                    return render(request, "visualisation.html", {'data':dataJSON})
+
+                elif generate_typ == "education":
+                    educ = []
+                    nbr_cas = []
+                    queryset = Victime.objects.values('education_vict').annotate(nbr_cas=Count('id')).filter(date_evenement__gte=date_debut, date_evenement__lte=date_fin)
+                    for element in queryset:
+                        educ.append(element['education_vict'])
+                        nbr_cas.append(element['nbr_cas'])
+                    data = {'labels':educ, 'data':nbr_cas}
+                    dataJSON = dumps(data) 
+                    return render(request, "visualisation.html", {'data':dataJSON})
+
+                elif generate_typ == "matrimonial":
+                    matri = []
+                    nbr_cas = []
+                    queryset = Victime.objects.values('statut_mart').annotate(nbr_cas=Count('id')).filter(date_evenement__gte=date_debut, date_evenement__lte=date_fin)
+                    for element in queryset:
+                        matri.append(element['statut_mart'])
+                        nbr_cas.append(element['nbr_cas'])
+                    data = {'labels':matri, 'data':nbr_cas}
+                    dataJSON = dumps(data) 
+                    return render(request, "visualisation.html", {'data':dataJSON})
+
+                elif generate_typ == "situation_pyhsique":
+                    sit_phy = []
+                    nbr_cas = []
+                    queryset = Victime.objects.values('situation_phy_vict').annotate(nbr_cas=Count('id')).filter(date_evenement__gte=date_debut, date_evenement__lte=date_fin)
+                    for element in queryset:
+                        sit_phy.append(element['situation_phy_vict'])
+                        nbr_cas.append(element['nbr_cas'])
+                    data = {'labels':sit_phy, 'data':nbr_cas}
+                    dataJSON = dumps(data) 
+                    return render(request, "visualisation.html", {'data':dataJSON})
+
+                elif generate_typ == "situation_psycho":
+                    sit_psy = []
+                    nbr_cas = []
+                    queryset = Victime.objects.values('situation_psycho_vict').annotate(nbr_cas=Count('id')).filter(date_evenement__gte=date_debut, date_evenement__lte=date_fin)
+                    for element in queryset:
+                        sit_psy.append(element['situation_psycho_vict'])
+                        nbr_cas.append(element['nbr_cas'])
+                    data = {'labels':sit_psy, 'data':nbr_cas}
+                    dataJSON = dumps(data) 
+                    return render(request, "visualisation.html", {'data':dataJSON})
+
+                else:
+                    sit_psy_auth = []
+                    nbr_cas = []
+                    queryset = Victime.objects.values('situation_psycho_auth').annotate(nbr_cas=Count('id')).filter(date_evenement__gte=date_debut, date_evenement__lte=date_fin)
+                    for element in queryset:
+                        sit_psy_auth.append(element['situation_psycho_auth'])
+                        nbr_cas.append(element['nbr_cas'])
+                    data = {'labels':sit_psy_auth, 'data':nbr_cas}
                     dataJSON = dumps(data) 
                     return render(request, "visualisation.html", {'data':dataJSON})
 
@@ -479,7 +578,7 @@ def ajouter_colline(request):
             messages.info(request,"Selectionnez l'acteur !")
             type_msg = "error"
             return render(request,"colline.html",locals())
-        elif len(com) == 0:
+        if len(com) == 0:
             acteurs = Acteur.objects.values('id','nom_act','prenom_act','telephone_act').filter(etat_act='non bloquer').order_by("nom_act")
             communes = Commune.objects.all().order_by("id")
             collines = Colline.objects.values('id','commune__nom_com','nom_col','acteur__nom_act','acteur__prenom_act','acteur__telephone_act').order_by("id")
@@ -629,6 +728,67 @@ def update_categorie(request, id_cat):
             messages.info(request,"La modification est reussie avec succes !")
             return redirect("cat_url")
 
+
+#prise en charge
+def afficher_prise_charge(request):
+    try:
+        user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+        charge = Prise_charge.objects.all().order_by("id")
+        show_logout_btn = True #afficher logout button
+        return render(request,"prise_charge.html",locals())
+    except ObjectDoesNotExist:
+        return redirect("auth_url")
+
+def ajouter_prise_charge(request):
+    if request.method == "POST":
+        design = request.POST.get("nom_charg").strip()
+        if len(design) == 0:
+            charge = Prise_charge.objects.all().order_by("id")
+            messages.info(request,"Saisissez le type de prise en charge svp !")
+            type_msg = "error"
+            return render(request,"prise_charge.html",{'type_msg':type_msg,'charge':charge})
+        else:
+            c = Prise_charge(designation = design)
+            c.save()
+            messages.info(request, "Enregistrement reussi avec succes !")
+            return redirect("charg_url")
+
+def supprimer_prise_charge(request, id_charg): 
+    if id_charg == 1:
+        charge = Prise_charge.objects.all().order_by("id")
+        messages.info(request,"Impossible de supprimer ce type c'est le type par defaut!")
+        return redirect("charg_url")
+    else:
+        try:
+            Prise_charge.objects.get(pk = id_charg).delete()
+            messages.info(request,"La suppresion est reussie avec succes !")
+            return redirect("charg_url")
+        except ProtectedError:
+            messages.info(request,"Impossible de supprimer il y'a des données liées à cette information que vous risquez de perdre !")
+            return redirect("charg_url")
+
+def editer_prise_charge(request, id_charg):
+    if id_charg == 1:
+        charge = Prise_charge.objects.all().order_by("id")
+        messages.info(request,"Impossible de modifier ce type c'est le type par defaut!")
+        return redirect("charg_url")
+    else:
+        user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
+        charge = Prise_charge.objects.get(pk = id_charg)
+        return render(request,"prise_charge_edit.html",{'charge':charge, 'user':user})
+
+def update_prise_charge(request, id_charg):
+    if request.method == "POST":
+        descr = request.POST.get("nom_charg").strip()
+        if len(descr) == 0:
+            messages.info(request,"Attention, vous n'avez pas mis la nouvelle valeur !!")
+            return redirect("charg_url")
+        else:
+            charg = Prise_charge.objects.get(pk = id_charg)
+            charg.designation = request.POST.get("nom_charg")
+            charg.save()
+            messages.info(request,"La modification est reussie avec succes !")
+            return redirect("charg_url")
 
 # groupe
 def afficher_groupe(request):
@@ -978,4 +1138,93 @@ def change_pwd(request):
                     type_msg = "error"
                     messages.info(request, "Echec,le numero ou l'ancien mot de passe n'existe pas ou vous êtes bloqué !")
                     return render(request,"change_password.html",{'type_msg':type_msg})
+
+#victime
+def afficher_victime(request):
+    try:
+        user = Utilisateur.objects.values('nom_uti','prenom_uti').get(user__username=request.user.username)
+        victime = Victime.objects.all().order_by("-date_evenement")
+        show_logout_btn = True #afficher logout button
+        return render(request,"victime.html",locals())
+    except ObjectDoesNotExist:
+        return redirect("auth_url")
+
+def supprimer_victime(request, id_vict):
+    try:
+        Victime.objects.get(pk = id_vict).delete()
+        messages.info(request,"La suppresion est reussie avec succes !")
+        return redirect("vict_url")
+    except ProtectedError:
+        messages.info(request,"Impossible de supprimer il y'a des données liées à cette information que vous risquez de perdre !")
+        return redirect("vict_url")
+
+def editer_victime(request, id_vict):
+    user = Utilisateur.objects.values('nom_uti','prenom_uti', 'profil').get(user__username=request.user.username)
+    victime = Victime.objects.get(pk = id_vict)
+    return render(request,"victime_edit.html",locals())
+
+def update_victime(request, id_vict):
+    if request.method == "POST":
+        nom = request.POST.get("nom_v").strip()
+        prenom = request.POST.get("prenom_v").strip()
+        sexe = request.POST.get("sexe_v").strip()
+        age = request.POST.get("age_v").strip()
+        inter_age = request.POST.get("interv_age").strip()
+        educ = request.POST.get("education_v").strip()
+        status_mat = request.POST.get("statut_matri").strip()
+        sit_phy = request.POST.get("situation_phy").strip()
+        sit_psycho = request.POST.get("situation_psyco").strip()
+        sit_psycho_aut = request.POST.get("situation_psyco_aut").strip()
+        sit_psycho_aut = request.POST.get("situation_psyco_aut").strip()
+        date_evenement = request.POST.get("date_ev").strip()
+        if len(date_evenement) == 0:
+            victime = Victime.objects.all().order_by("-date_evenement")
+            messages.info(request,"Attention echec de modification, vous n'avez pas mis la date de l'evenement !")
+            return redirect("vict_url")
+        else:
+            vict = Victime.objects.get(pk = id_vict)
+            vict.nom_vict = nom
+            vict.prenom_vict = prenom
+            vict.sexe_vict = sexe
+            vict.age_vict = age
+            vict.inter_age = inter_age
+            vict.situation_phy_vict = sit_phy
+            vict.situation_psycho_vict = sit_psycho
+            vict.statut_mart = status_mat
+            vict.education_vict =  educ
+            vict.situation_psycho_auth = sit_psycho_aut
+            vict.date_evenement = date_evenement
+            vict.save()
+            messages.info(request,"La modification est reussie avec succes !")
+            return redirect("vict_url")
+
+def ajouter_victime(request):
+    if request.method == "POST":
+            nom = request.POST.get("nom_v").strip()
+            prenom = request.POST.get("prenom_v").strip()
+            sexe = request.POST.get("sexe_v").strip()
+            age = request.POST.get("age_v").strip()
+            inter_age = request.POST.get("interv_age").strip()
+            educ = request.POST.get("education_v").strip()
+            status_mat = request.POST.get("statut_matri").strip()
+            sit_phy = request.POST.get("situation_phy").strip()
+            sit_psycho = request.POST.get("situation_psyco").strip()
+            sit_psycho_aut = request.POST.get("situation_psyco_aut").strip()
+            date_evenement = request.POST.get("date_ev").strip()
+            if len(sexe) == 0 or len(age) == 0 or len(inter_age) == 0 or len(educ) == 0 or len(status_mat) == 0 or len(sit_phy) == 0 or len(sit_psycho) == 0 or len(sit_psycho_aut) == 0 or len(date_evenement) == 0:
+                victime = Victime.objects.all().order_by("-date_evenement")
+                messages.info(request,"Saisissez tous les informations nécessaire. seul nom et prenom peuvent être vide !")
+                type_msg = "error"
+                return render(request,"victime.html",{'type_msg':type_msg,'victime':victime})
+            else:
+                if  not bool(re.search('[a-zA-Z]', age)):
+                    vict = Victime(nom_vict = nom, prenom_vict = prenom, sexe_vict = sexe, age_vict = age, inter_age = inter_age, situation_phy_vict = sit_phy, situation_psycho_vict = sit_psycho, statut_mart = status_mat, education_vict = educ, situation_psycho_auth = sit_psycho_aut, date_evenement = date_evenement)
+                    vict.save()
+                    messages.info(request, "Enregistrement reussi avec succes !")
+                    return redirect("vict_url")
+                else:
+                    victime = Victime.objects.all().order_by("-date_evenement")
+                    messages.info(request,"Age doit être un nombre !")
+                    type_msg = "error"
+                    return render(request,"victime.html",{'type_msg':type_msg,'victime':victime}) 
 

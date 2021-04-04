@@ -19,6 +19,9 @@
             
               <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
+                  <li class="nav-item ml-4">
+                    <a class="nav-link" href="{% url 'vict_url' %}" style="color: white;">Victime</a>
+                  </li>
                   <li class="nav-item ml-5">
                     <a class="nav-link" href="{% url 'env_url' %}" style="color: white;">Envoyer SMS </a>
                   </li>
@@ -66,12 +69,15 @@
                       <div class="dropdown-divider"></div>
                       <a class="dropdown-item" href="{% url 'cat_url' %}">Categorie</a>
                       <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="{% url 'charg_url' %}">Prise en charge</a>
+                      <div class="dropdown-divider"></div>
                       <a class="dropdown-item" href="{% url 'grp_url' %}">Groupe</a>
                       <div class="dropdown-divider"></div>
                       <a class="dropdown-item" href="{% url 'actgrp_url' %}">Acteur->Groupe</a>
-                      
-                    
                     </div>
+                  </li>
+                  <li class="nav-item ml-4">
+                    <a class="nav-link" href="{% url 'vict_url' %}" style="color: white;">Victime</a>
                   </li>
                   <li class="nav-item ml-4">
                     <a class="nav-link" href="{% url 'env_url' %}" style="color: white;">Envoyer SMS </a>
@@ -146,7 +152,6 @@
                   "ordering": false
                 });
                 $('.dataTables_length').addClass('bs-select');
-
                 
               });
 

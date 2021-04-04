@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if type_msg %}
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if messages %}
+            <div class="alert alert-primary " role="alert">
+                {% for message in messages %}
+                    <strong>{{message}}</strong>
+                {% endfor %}
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+    
+    <form action="addcharg" method="POST">
+        {% csrf_token %}
+        <div class="row form-inline mt-5 justify-content-center align-items-center">
+            <label for="nom_charg" style="width: 200px;">Type de prise en charge :</label>
+            <input type="text" name="nom_charg" id="nom_charg" class="form-control" autocomplete="off">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+    </form>
+    <div class="mt-5 row form-inline justify-content-center align-items-center" style="width:100%;">
+        <table table id="dtBasicExample" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
+            <thead>
+                <tr >
+                    <th class="th-sm">Types des prises en charge enregistrés</th>
+                    <th class="th-sm"></th>
+                    <th class="th-sm"></th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                {% for item in charge %}
+                    <tr>
+                        <td>{{item.designation}}</td>
+                        <td>
+                            <form action="edtcharg/{{item.id}}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary" style="padding-top:2px;padding-bottom: 2px;">editer</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="delcharg/{{ item.id }}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment effacer cet element?')" style="padding-top:2px;padding-bottom: 2px;">supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr >
+                        <h2><td colspan="3" >Il n'y a pas des types des prises en charge enregistrés </td></h2>
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+            <tfoot>
+                <tr>
+                  <th>Types des prises en charge enregistrés
+                  </th>
+                  <th>
+                  </th>
+                  <th>
+                  </th>
+                </tr>
+              </tfoot>
+        </table> 
+    </div>
+{% endblock content %}
